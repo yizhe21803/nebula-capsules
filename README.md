@@ -1,79 +1,181 @@
-# 画境观屿 · Nebula Capsules
+# 画境观屿 · 宇宙胶囊
 
-Interactive WebGL cosmic fluid materials inside fixed capsule cards.
+[English README](README.en.md)
 
-![Nebula Capsules preview](assets/preview.svg)
+六组实时生成的宇宙流体胶囊：**Original、Ocean、Klein、Ultraviolet、Chrome、Plus**。页面包含 WebGL2 流体渲染、自动播放、鼠标与触摸引力、暂停控制、冷暖筛选和沉浸式预览。
 
-## Highlights
+## 一键启动（推荐）
 
-- Real-time GLSL nebula rendering with domain-warped FBM noise
-- Six deterministic cosmic color presets
-- Pointer / touch gravity swirl interaction
-- Click-to-open immersive full-screen view
-- Responsive desktop and mobile layout
-- Intersection-based rendering pause for off-screen cards
-- Reduced-motion support and Canvas 2D fallback
-- Zero runtime dependencies
-- GitHub Pages deployment workflow included
+解压源码包后，打开以下文件夹：
 
-## Run locally
+```text
+一键启动/
+├── macOS-一键启动.command
+├── Windows-一键启动.bat
+└── 一键启动说明.txt
+```
+
+### macOS 一键启动
+
+1. 确认电脑已安装 **Node.js 18 或更高版本**。
+2. 打开项目中的 `一键启动` 文件夹。
+3. 双击 `macOS-一键启动.command`。
+4. 终端窗口会显示启动状态，浏览器随后自动打开页面。
+5. 页面运行期间请保持终端窗口开启。
+6. 停止服务时，在终端按 **Control + C**，或直接关闭终端窗口。
+
+macOS 第一次打开未签名的 `.command` 文件时可能会阻止运行。此时：
+
+1. 右键点击 `macOS-一键启动.command`。
+2. 选择“打开”。
+3. 在系统弹窗中再次确认“打开”。
+
+若系统提示文件没有执行权限，请在项目根目录打开终端并执行：
+
+```bash
+chmod +x "一键启动/macOS-一键启动.command"
+```
+
+完成后重新双击启动文件。
+
+### Windows 一键启动
+
+1. 确认电脑已安装 **Node.js 18 或更高版本**。
+2. 打开项目中的 `一键启动` 文件夹。
+3. 双击 `Windows-一键启动.bat`。
+4. 命令提示符窗口会显示启动状态，浏览器随后自动打开页面。
+5. 页面运行期间请保持命令窗口开启。
+6. 停止服务时按 **Ctrl + C**，或直接关闭命令窗口。
+
+若 Windows Defender SmartScreen 显示警告，仅在确认源码包可信时继续运行。
+
+## 其他打开方式
+
+### 方式一：npm 启动
+
+在项目根目录打开终端：
 
 ```bash
 npm start
 ```
 
-Open `http://127.0.0.1:4173`.
+### 方式二：直接使用 Node.js
 
-## Project structure
+项目不依赖第三方运行库，也可以直接执行：
+
+```bash
+node scripts/serve.mjs
+```
+
+### 方式三：指定端口
+
+```bash
+node scripts/serve.mjs --port 5000
+```
+
+### 方式四：启动时不自动打开浏览器
+
+```bash
+node scripts/serve.mjs --no-open
+```
+
+然后手动打开终端中显示的网址。
+
+## 网址与端口规则
+
+默认地址：
 
 ```text
-.
-├── index.html
-├── styles.css
-├── src/
-│   ├── main.js
-│   ├── cosmic-shader.js
-│   ├── fallback.js
-│   └── presets.js
-├── scripts/serve.mjs
-├── tests/smoke.mjs
-└── .github/workflows/pages.yml
+http://127.0.0.1:4173
 ```
 
-## Customize a preset
+如果 4173 端口已被占用，服务会自动尝试 4174、4175 以及后续可用端口。请以终端最终显示的网址为准。
 
-Edit `src/presets.js`:
+> 不要直接双击 `index.html`。项目使用 ES Modules，`file://` 打开方式可能阻止脚本和资源加载，应通过本地服务运行。
 
-```js
-{
-  id: 'aurora-veil',
-  code: 'NC-01',
-  name: 'AURORA VEIL',
-  group: 'cold',
-  seed: 1.7,
-  speed: 0.16,
-  colors: ['#061326', '#5b38df', '#34d9ff', '#8bffe9']
-}
+## 检查 Node.js
+
+在终端或命令提示符执行：
+
+```bash
+node -v
 ```
 
-## Quality checks
+显示版本应为 `v18.x`、`v20.x`、`v22.x` 或更高版本。若命令不可用，需要先安装 Node.js，或检查 Node.js 是否已加入系统 PATH。
+
+## 页面操作
+
+- **自动播放**：页面加载后六组胶囊立即开始流动。
+- **随机形态**：重新生成全部胶囊的形态参数。
+- **暂停 / 继续**：冻结或恢复所有可见胶囊的动画。
+- **全部 / 冷调 / 暖调**：按配色分组筛选胶囊。
+- **点击胶囊**：进入对应配色的全屏沉浸式预览。
+- **移动鼠标或触摸**：临时改变流体的引力方向。
+- **重新生成**：在沉浸预览中重新生成当前胶囊形态。
+- **关闭**：退出沉浸式预览。
+
+## 功能
+
+- WebGL2 实时流体与星云渲染
+- WebGL 不可用时自动切换 Canvas 2D 动效
+- 六组独立配色预设
+- 页面加载后自动播放
+- 鼠标和触摸引力交互
+- 全局暂停与继续
+- 随机重置形态
+- 冷调与暖调筛选
+- 全屏沉浸式预览
+- 离屏胶囊暂停渲染
+- 桌面双列、移动端单列响应式布局
+- 胶囊右上角圆点装饰已移除
+
+## 常见问题
+
+### 双击启动文件没有反应
+
+在终端或命令提示符执行 `node -v`。若没有显示版本，说明 Node.js 尚未安装，或没有加入系统 PATH。
+
+### 浏览器没有自动打开
+
+复制终端中显示的网址，例如：
+
+```text
+http://127.0.0.1:4173
+```
+
+然后在浏览器地址栏手动打开。
+
+### 4173 端口已被占用
+
+不需要手动处理。服务会自动寻找后续可用端口，并在终端显示最终地址。
+
+### 页面能打开，但没有完整流体效果
+
+浏览器或显卡可能不支持 WebGL2。项目会自动使用 Canvas 2D 降级动画。建议使用较新版本的 Chrome、Edge 或 Safari。
+
+### 如何停止服务
+
+在正在运行服务的终端中，macOS 按 `Control + C`，Windows 按 `Ctrl + C`；也可以直接关闭终端或命令窗口。
+
+## 开发与验证
 
 ```bash
 npm run check
 npm test
 ```
 
-## Deploy to GitHub Pages
+## 主要文件
 
-1. Push the repository to GitHub.
-2. Open **Settings → Pages**.
-3. Choose **GitHub Actions** as the source.
-4. Push to `main`; the included workflow publishes the site.
+```text
+index.html              页面结构
+styles.css              页面与组件样式
+src/                    动画和交互源码
+scripts/serve.mjs       本地静态服务
+一键启动/               独立的一键启动入口
+README.md               中文说明
+README.en.md            英文说明
+```
 
-## Browser support
+## 网络范围
 
-Modern browsers with WebGL2 are recommended. A Canvas 2D fallback is provided for unsupported environments.
-
-## License
-
-MIT © 2026 yizhe21803
+项目默认仅监听本机地址 `127.0.0.1`，不会自动发布到互联网，也不会上传用户数据。

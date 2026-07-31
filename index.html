@@ -3,70 +3,74 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#f4f2f7" />
-    <meta name="description" content="画境观屿 — 带左侧留白信息区的宇宙星云胶囊 WebGL 动效。" />
-    <title>画境观屿 — 宇宙星云胶囊</title>
-    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#f3f0e8" />
+    <meta name="description" content="画境观屿 · 六组实时流动的宇宙胶囊 WebGL 视觉实验。" />
+    <title>画境观屿 · 宇宙胶囊</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div class="noise" aria-hidden="true"></div>
-    <main class="shell">
-      <header class="topbar">
-        <div>
-          <p class="eyebrow">GENERATIVE COSMIC STUDIES</p>
+    <main class="page-shell">
+      <header class="site-header">
+        <div class="brand-block">
+          <p class="micro-label">GENERATIVE COLOR STUDIES</p>
           <h1>画境观屿</h1>
+          <p class="brand-subtitle">COSMIC CAPSULES</p>
         </div>
-        <div class="topbar-meta">
-          <span>WEBGL / GLSL</span>
-          <span>HUA JING GUAN YU</span>
-          <button class="icon-button" id="pause-button" type="button" aria-pressed="false" aria-label="暂停动效">Ⅱ</button>
+
+        <div class="header-actions" aria-label="页面操作">
+          <button class="text-action" id="shuffle-button" type="button">随机切换</button>
+          <button class="primary-action" id="pause-button" type="button" aria-pressed="false">
+            <span class="pause-icon" aria-hidden="true">Ⅱ</span>
+            <span class="pause-label">暂停动效</span>
+          </button>
         </div>
       </header>
 
-      <section class="intro-grid" aria-labelledby="intro-title">
-        <div class="intro-copy">
-          <p class="kicker">COSMOS AS A LIVING SYSTEM.</p>
-          <h2 id="intro-title">让宇宙材质，<br />在固定容器里“活”起来。</h2>
-          <p class="description">参考图采用“左侧留白信息区 + 右侧动态材质”的胶囊结构。六组星云实时生成，拖动指针可制造轻微引力扰动。</p>
+      <section class="content-layout" aria-labelledby="intro-title">
+        <aside class="intro-panel">
+          <p class="section-kicker">COLOR AS A LIVING SYSTEM.</p>
+          <h2 id="intro-title">让固定的形状，<br />拥有会呼吸的宇宙。</h2>
+          <p class="intro-copy">
+            六组持续生成的流体材质，在奶油白胶囊中缓慢迁移。移动鼠标或触摸画面，可短暂改变星云的引力方向。
+          </p>
 
-          <fieldset class="filter" aria-label="星云风格筛选">
-            <legend class="sr-only">星云风格</legend>
-            <button class="filter-button is-active" data-filter="all" type="button">ALL</button>
-            <button class="filter-button" data-filter="cold" type="button">COLD</button>
-            <button class="filter-button" data-filter="warm" type="button">WARM</button>
-          </fieldset>
+          <div class="filters" role="group" aria-label="胶囊筛选">
+            <button class="filter-button is-active" data-filter="all" type="button">全部</button>
+            <button class="filter-button" data-filter="cold" type="button">冷调</button>
+            <button class="filter-button" data-filter="warm" type="button">暖调</button>
+          </div>
 
-          <ol class="preset-index" id="preset-index"></ol>
-          <p class="counter"><span id="visible-count">06</span> / 06</p>
-        </div>
+          <ol class="capsule-index" id="capsule-index"></ol>
+          <p class="capsule-count"><span id="visible-count">06</span> / 06</p>
+        </aside>
 
         <div class="capsule-grid" id="capsule-grid" aria-live="polite"></div>
       </section>
 
-      <footer>
+      <footer class="site-footer">
         <span>© 画境观屿 · DIGITAL ART, CODE, EMOTION.</span>
         <span>MOVE · TOUCH · EXPLORE</span>
       </footer>
     </main>
 
     <dialog class="viewer" id="viewer">
-      <div class="viewer-panel">
-        <canvas id="viewer-canvas" aria-label="沉浸式宇宙星云动效"></canvas>
-        <div class="viewer-overlay">
-          <div>
+      <div class="viewer-stage">
+        <canvas id="viewer-canvas" aria-label="沉浸式宇宙流体动效"></canvas>
+        <div class="viewer-chrome">
+          <div class="viewer-title-group">
             <p id="viewer-code">NC-01</p>
-            <h2 id="viewer-title">AURORA VEIL</h2>
+            <h2 id="viewer-title">ORIGINAL</h2>
+            <span>画境观屿 · LIVE COSMIC STUDY</span>
           </div>
           <div class="viewer-actions">
-            <button id="randomize-button" type="button">RANDOMIZE</button>
-            <button id="close-viewer" type="button">CLOSE</button>
+            <button id="viewer-randomize" type="button">随机形态</button>
+            <button id="viewer-close" type="button">关闭</button>
           </div>
         </div>
       </div>
     </dialog>
 
-    <noscript>该演示需要启用 JavaScript。</noscript>
+    <noscript>该页面需要启用 JavaScript 才能播放宇宙流体动效。</noscript>
     <script type="module" src="src/main.js"></script>
   </body>
 </html>

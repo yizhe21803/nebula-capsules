@@ -3,83 +3,36 @@ import { FallbackRenderer } from './fallback.js';
 import { PRESETS } from './presets.js';
 
 const grid = document.querySelector('#capsule-grid');
-const indexList = document.querySelector('#preset-index');
+const indexList = document.querySelector('#capsule-index');
 const pauseButton = document.querySelector('#pause-button');
+const pauseIcon = pauseButton.querySelector('.pause-icon');
+const pauseLabel = pauseButton.querySelector('.pause-label');
+const shuffleButton = document.querySelector('#shuffle-button');
 const visibleCount = document.querySelector('#visible-count');
 const viewer = document.querySelector('#viewer');
 const viewerCanvas = document.querySelector('#viewer-canvas');
 const viewerTitle = document.querySelector('#viewer-title');
 const viewerCode = document.querySelector('#viewer-code');
-const closeViewer = document.querySelector('#close-viewer');
-const randomizeButton = document.querySelector('#randomize-button');
+const viewerClose = document.querySelector('#viewer-close');
+const viewerRandomize = document.querySelector('#viewer-randomize');
 
-const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 let paused = false;
 let pageVisible = !document.hidden;
+let animationTime = 0;
+let lastFrame = performance.now();
 let viewerRenderer = null;
-let activePreset = PRESETS[0];
-let frozenTime = 0;
-let pauseStartedAt = 0;
-let accumulatedPause = 0;
 const renderers = [];
 
 function createRenderer(canvas, preset, options) {
   try {
     return new CosmicRenderer(canvas, preset, options);
   } catch (error) {
-    console.warn('[画境观屿] WebGL2 unavailable, using Canvas 2D fallback.', error);
+    console.warn('[画境观屿] WebGL2 不可用，已切换 Canvas 2D 降级动效。', error);
     return new FallbackRenderer(canvas, preset);
   }
 }
 
-function createCard(preset) {
-  const card = document.createElement('button');
-  card.type = 'button';
-  card.className = 'capsule-card';
-  card.dataset.group = preset.group;
-  card.setAttribute('aria-label', `打开 ${preset.name} 沉浸视图`);
-  card.innerHTML = `
-    <span class="capsule-heading">
-      <span><span class="capsule-code">${preset.code}</span> <strong>${preset.name}</strong></span>
-      <span class="capsule-mode">LIVE</span>
-    </span>
-    <span class="capsule-stage">
-      <span class="capsule-copy-panel">
-        <span class="capsule-brand">画境观屿</span>
-        <span class="capsule-meta">HUA JING GUAN YU</span>
-        <span class="capsule-state">LIVE COSMIC STUDY</span>
-      </span>
-      <span class="capsule-visual">
-        <canvas aria-hidden="true"></canvas>
-      </span>
-      <span class="capsule-orbit-dot" aria-hidden="true">•</span>
-    </span>
-  `;
-  const canvas = card.querySelector('canvas');
-  const renderer = createRenderer(canvas, preset, { dprCap: 1.6 });
-  renderers.push(renderer);
-  card.addEventListener('click', () => openViewer(preset));
-  grid.append(card);
-  return { card, renderer };
-}
-
-PRESETS.forEach((preset) => {
-  createCard(preset);
-  const item = document.createElement('li');
-  item.textContent = `${preset.code} ${preset.name}`;
-  indexList.append(item);
-});
-
-const observer = new IntersectionObserver((entries) => {
-  for (const entry of entries) {
-    const index = [...grid.children].indexOf(entry.target);
-    if (renderers[index]) renderers[index].visible = entry.isIntersecting;
-  }
-}, { rootMargin: '160px' });
-[...grid.children].forEach((card) => observer.observe(card));
-
 function openViewer(preset) {
-  activePreset = preset;
   viewerTitle.textContent = preset.name;
   viewerCode.textContent = preset.code;
   viewer.showModal();
@@ -87,29 +40,82 @@ function openViewer(preset) {
   viewerRenderer = createRenderer(viewerCanvas, preset, { dprCap: 2 });
 }
 
-function closeActiveViewer() {
+function closeViewer() {
   viewerRenderer?.dispose();
   viewerRenderer = null;
   viewer.close();
 }
 
-closeViewer.addEventListener('click', closeActiveViewer);
-viewer.addEventListener('cancel', (event) => {
-  event.preventDefault();
-  closeActiveViewer();
-});
-viewer.addEventListener('click', (event) => {
-  if (event.target === viewer) closeActiveViewer();
-});
-randomizeButton.addEventListener('click', () => viewerRenderer?.randomize());
+function createCard(preset) {
+  const card = document.createElement('button');
+  card.type = 'button';
+  card.className = 'capsule-card';
+  card.dataset.group = preset.group;
+  card.setAttribute('aria-label', `打开 ${preset.name} 沉浸预览`);
+  card.innerHTML = `
+    <span class="card-topline">
+      <span><span class="card-code">${preset.code}</span> <strong>${preset.name}</strong></span>
+      <span class="card-live">LIVE</span>
+    </span>
+    <span class="capsule-stage">
+      <span class="card-copy">
+        <span class="card-code-inside">${preset.code}</span>
+        <span class="card-name">${preset.name}</span>
+        <span class="card-brand">画境观屿</span>
+        <span class="card-brand-en">HUA JING GUAN YU</span>
+        <span class="card-state">LIVE COSMIC STUDY</span>
+      </span>
+      <span class="capsule-visual"><canvas aria-hidden="true"></canvas></span>
+    </span>
+  `;
+
+  const canvas = card.querySelector('canvas');
+  const renderer = createRenderer(canvas, preset, { dprCap: 1.55 });
+  renderers.push(renderer);
+  card.addEventListener('click', () => openViewer(preset));
+  grid.append(card);
+}
+
+for (const preset of PRESETS) {
+  createCard(preset);
+  const item = document.createElement('li');
+  item.textContent = `${preset.code} ${preset.name}`;
+  indexList.append(item);
+}
+
+const observer = new IntersectionObserver((entries) => {
+  for (const entry of entries) {
+    const index = [...grid.children].indexOf(entry.target);
+    if (renderers[index]) renderers[index].visible = entry.isIntersecting;
+  }
+}, { rootMargin: '180px' });
+
+[...grid.children].forEach((card) => observer.observe(card));
+
+function updatePauseControl() {
+  pauseButton.setAttribute('aria-pressed', String(paused));
+  pauseIcon.textContent = paused ? '▶' : 'Ⅱ';
+  pauseLabel.textContent = paused ? '继续动效' : '暂停动效';
+}
 
 pauseButton.addEventListener('click', () => {
   paused = !paused;
-  pauseButton.setAttribute('aria-pressed', String(paused));
-  pauseButton.textContent = paused ? '▶' : 'Ⅱ';
-  pauseButton.setAttribute('aria-label', paused ? '继续动效' : '暂停动效');
-  if (paused) pauseStartedAt = performance.now();
-  else if (pauseStartedAt) accumulatedPause += performance.now() - pauseStartedAt;
+  updatePauseControl();
+});
+
+shuffleButton.addEventListener('click', () => {
+  for (const renderer of renderers) renderer.randomize();
+  viewerRenderer?.randomize();
+});
+
+viewerRandomize.addEventListener('click', () => viewerRenderer?.randomize());
+viewerClose.addEventListener('click', closeViewer);
+viewer.addEventListener('cancel', (event) => {
+  event.preventDefault();
+  closeViewer();
+});
+viewer.addEventListener('click', (event) => {
+  if (event.target === viewer) closeViewer();
 });
 
 for (const button of document.querySelectorAll('.filter-button')) {
@@ -119,9 +125,9 @@ for (const button of document.querySelectorAll('.filter-button')) {
     const filter = button.dataset.filter;
     let count = 0;
     for (const card of grid.children) {
-      const visible = filter === 'all' || card.dataset.group === filter;
-      card.hidden = !visible;
-      if (visible) count += 1;
+      const show = filter === 'all' || card.dataset.group === filter;
+      card.hidden = !show;
+      if (show) count += 1;
     }
     visibleCount.textContent = String(count).padStart(2, '0');
   });
@@ -129,43 +135,20 @@ for (const button of document.querySelectorAll('.filter-button')) {
 
 document.addEventListener('visibilitychange', () => {
   pageVisible = !document.hidden;
+  lastFrame = performance.now();
 });
 
-function driveAutomaticMotion(renderer, index, time) {
-  if (!renderer || !Array.isArray(renderer.pointerTarget)) return;
-
-  // Pointer interaction temporarily owns the effect at motionTarget=1.
-  // When the pointer leaves, the autonomous orbit resumes automatically.
-  if (renderer.motionTarget >= 0.9) return;
-
-  const pace = reduceMotion ? 0.16 : 0.56;
-  const amplitudeX = reduceMotion ? 0.07 : 0.23;
-  const amplitudeY = reduceMotion ? 0.05 : 0.18;
-  const phase = time * pace + index * 1.37;
-
-  renderer.pointerTarget[0] = 0.67 + Math.sin(phase) * amplitudeX;
-  renderer.pointerTarget[1] = 0.5 + Math.cos(phase * 0.82) * amplitudeY;
-  renderer.motionTarget = reduceMotion ? 0.2 : 0.68;
-}
-
 function render(now) {
-  if (!paused) frozenTime = (now - accumulatedPause) / 1000;
-  if (pageVisible) {
-    renderers.forEach((renderer, index) => {
-      if (!paused) driveAutomaticMotion(renderer, index, frozenTime);
-      renderer.draw(frozenTime, paused);
-    });
+  const delta = Math.min((now - lastFrame) / 1000, 0.05);
+  lastFrame = now;
+  if (!paused) animationTime += delta;
 
-    if (viewerRenderer) {
-      const viewerIndex = PRESETS.indexOf(activePreset) + renderers.length;
-      if (!paused) driveAutomaticMotion(viewerRenderer, viewerIndex, frozenTime);
-      viewerRenderer.draw(frozenTime, paused);
-    }
+  if (pageVisible) {
+    for (const renderer of renderers) renderer.draw(animationTime);
+    viewerRenderer?.draw(animationTime);
   }
   requestAnimationFrame(render);
 }
 
-pauseButton.setAttribute('aria-pressed', String(paused));
-pauseButton.textContent = paused ? '▶' : 'Ⅱ';
-pauseButton.setAttribute('aria-label', paused ? '继续动效' : '暂停动效');
+updatePauseControl();
 requestAnimationFrame(render);
