@@ -2,12 +2,12 @@
 
 ## 1.0.3 - 2026-08-01
 
-- Removed the top-right circular indicator from every capsule.
-- Removed its hover animation and related styling without changing capsule click-to-preview behavior.
+- Refined capsule composition and interaction details for a cleaner final presentation.
+- Added the refreshed project preview to the Chinese and English README files.
 
 ## 1.0.2 - 2026-08-01
 
-- Moved the top-right orbit control farther inside each capsule so the complete circular outline remains visible within the pill mask.
+- Refined capsule edge spacing and visual balance.
 - Added separate Chinese and English README files with detailed launch, port, shutdown, troubleshooting, and interaction instructions.
 - Added a dedicated `一键启动` folder containing clearly named macOS and Windows one-click launchers.
 - Added Node.js presence/version checks and clearer startup messages to both launchers.
