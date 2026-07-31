@@ -1,0 +1,151 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1080" viewBox="0 0 1440 1080">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f3f0e8"/>
+      <stop offset="1" stop-color="#ece8de"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-50%" width="140%" height="200%">
+      <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#20231f" flood-opacity=".08"/>
+    </filter>
+    <linearGradient id="original" x1="0" y1=".45" x2="1" y2=".55">
+      <stop offset="0" stop-color="#fff3ea"/>
+      <stop offset=".28" stop-color="#f5b27a"/>
+      <stop offset=".62" stop-color="#f67bc6"/>
+      <stop offset="1" stop-color="#a978e8"/>
+    </linearGradient>
+    <linearGradient id="ocean" x1="0" y1=".62" x2="1" y2=".28">
+      <stop offset="0" stop-color="#eaf6ff"/>
+      <stop offset=".3" stop-color="#8fd0ff"/>
+      <stop offset=".66" stop-color="#3b87f6"/>
+      <stop offset="1" stop-color="#6b58e9"/>
+    </linearGradient>
+    <linearGradient id="klein" x1="0" y1=".3" x2="1" y2=".7">
+      <stop offset="0" stop-color="#edf2ff"/>
+      <stop offset=".34" stop-color="#2f58d5"/>
+      <stop offset=".66" stop-color="#1b2040"/>
+      <stop offset="1" stop-color="#e07a43"/>
+    </linearGradient>
+    <linearGradient id="ultra" x1="0" y1=".7" x2="1" y2=".2">
+      <stop offset="0" stop-color="#f2eeff"/>
+      <stop offset=".32" stop-color="#b99af1"/>
+      <stop offset=".68" stop-color="#8f74db"/>
+      <stop offset="1" stop-color="#d7d85c"/>
+    </linearGradient>
+    <linearGradient id="chrome" x1="0" y1=".2" x2="1" y2=".75">
+      <stop offset="0" stop-color="#f5f6f8"/>
+      <stop offset=".35" stop-color="#b9c0cc"/>
+      <stop offset=".67" stop-color="#7f8793"/>
+      <stop offset="1" stop-color="#4a4f59"/>
+    </linearGradient>
+    <linearGradient id="plus" x1="0" y1=".6" x2="1" y2=".25">
+      <stop offset="0" stop-color="#fff0e6"/>
+      <stop offset=".32" stop-color="#f6c26b"/>
+      <stop offset=".66" stop-color="#f98a64"/>
+      <stop offset="1" stop-color="#e86d74"/>
+    </linearGradient>
+    <linearGradient id="fade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#faf8f2" stop-opacity="1"/>
+      <stop offset=".78" stop-color="#faf8f2" stop-opacity="1"/>
+      <stop offset="1" stop-color="#faf8f2" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="c1"><rect x="470" y="245" width="400" height="128" rx="64"/></clipPath>
+    <clipPath id="c2"><rect x="920" y="245" width="400" height="128" rx="64"/></clipPath>
+    <clipPath id="c3"><rect x="470" y="455" width="400" height="128" rx="64"/></clipPath>
+    <clipPath id="c4"><rect x="920" y="455" width="400" height="128" rx="64"/></clipPath>
+    <clipPath id="c5"><rect x="470" y="665" width="400" height="128" rx="64"/></clipPath>
+    <clipPath id="c6"><rect x="920" y="665" width="400" height="128" rx="64"/></clipPath>
+  </defs>
+
+  <rect width="1440" height="1080" fill="url(#bg)"/>
+
+  <text x="62" y="58" font-family="monospace" font-size="12" letter-spacing="2" fill="#77786f">GENERATIVE COLOR STUDIES</text>
+  <text x="62" y="118" font-family="sans-serif" font-size="54" font-weight="600" letter-spacing="2" fill="#20231f">画境观屿</text>
+  <text x="62" y="148" font-family="monospace" font-size="11" letter-spacing="2" fill="#77786f">COSMIC CAPSULES</text>
+  <line x1="62" y1="184" x2="1378" y2="184" stroke="#20231f" stroke-opacity=".13"/>
+
+  <text x="62" y="260" font-family="monospace" font-size="13" font-weight="700" letter-spacing="1.6" fill="#20231f">COLOR AS A LIVING SYSTEM.</text>
+  <text x="62" y="315" font-family="sans-serif" font-size="32" font-weight="650" fill="#20231f">让固定的形状，</text>
+  <text x="62" y="358" font-family="sans-serif" font-size="32" font-weight="650" fill="#20231f">拥有会呼吸的宇宙。</text>
+  <text x="62" y="410" font-family="sans-serif" font-size="14" fill="#77786f">六组持续生成的流体材质，在奶油白胶囊中缓慢迁移。</text>
+  <text x="62" y="438" font-family="sans-serif" font-size="14" fill="#77786f">移动鼠标或触摸画面，可短暂改变星云的引力方向。</text>
+
+  <rect x="62" y="530" width="252" height="40" rx="20" fill="#dedbd2"/>
+  <rect x="66" y="534" width="78" height="32" rx="16" fill="#20231f"/>
+  <text x="92" y="555" font-family="sans-serif" font-size="11" fill="#fff">全部</text>
+  <text x="180" y="555" font-family="sans-serif" font-size="11" fill="#77786f">冷调</text>
+  <text x="264" y="555" font-family="sans-serif" font-size="11" fill="#77786f">暖调</text>
+
+  <g font-family="monospace" font-size="10" fill="#77786f">
+    <text x="62" y="640">○ NC-01 ORIGINAL</text>
+    <text x="62" y="678">○ NC-02 OCEAN</text>
+    <text x="62" y="716">○ NC-03 KLEIN</text>
+    <text x="62" y="754">○ NC-04 ULTRAVIOLET</text>
+    <text x="62" y="792">○ NC-05 CHROME</text>
+    <text x="62" y="830">○ NC-06 PLUS</text>
+    <text x="62" y="884">06 / 06</text>
+  </g>
+
+  <g font-family="monospace" font-size="10" fill="#20231f">
+    <text x="490" y="232">NC-01  ORIGINAL</text>
+    <text x="940" y="232">NC-02  OCEAN</text>
+    <text x="490" y="442">NC-03  KLEIN</text>
+    <text x="940" y="442">NC-04  ULTRAVIOLET</text>
+    <text x="490" y="652">NC-05  CHROME</text>
+    <text x="940" y="652">NC-06  PLUS</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="470" y="245" width="400" height="128" rx="64" fill="#faf8f2" stroke="#20231f" stroke-opacity=".14"/>
+    <rect x="630" y="245" width="240" height="128" fill="url(#original)" clip-path="url(#c1)"/>
+    <rect x="470" y="245" width="220" height="128" fill="url(#fade)" clip-path="url(#c1)"/>
+
+    <rect x="920" y="245" width="400" height="128" rx="64" fill="#faf8f2" stroke="#20231f" stroke-opacity=".14"/>
+    <rect x="1080" y="245" width="240" height="128" fill="url(#ocean)" clip-path="url(#c2)"/>
+    <rect x="920" y="245" width="220" height="128" fill="url(#fade)" clip-path="url(#c2)"/>
+
+    <rect x="470" y="455" width="400" height="128" rx="64" fill="#faf8f2" stroke="#20231f" stroke-opacity=".14"/>
+    <rect x="630" y="455" width="240" height="128" fill="url(#klein)" clip-path="url(#c3)"/>
+    <rect x="470" y="455" width="220" height="128" fill="url(#fade)" clip-path="url(#c3)"/>
+
+    <rect x="920" y="455" width="400" height="128" rx="64" fill="#faf8f2" stroke="#20231f" stroke-opacity=".14"/>
+    <rect x="1080" y="455" width="240" height="128" fill="url(#ultra)" clip-path="url(#c4)"/>
+    <rect x="920" y="455" width="220" height="128" fill="url(#fade)" clip-path="url(#c4)"/>
+
+    <rect x="470" y="665" width="400" height="128" rx="64" fill="#faf8f2" stroke="#20231f" stroke-opacity=".14"/>
+    <rect x="630" y="665" width="240" height="128" fill="url(#chrome)" clip-path="url(#c5)"/>
+    <rect x="470" y="665" width="220" height="128" fill="url(#fade)" clip-path="url(#c5)"/>
+
+    <rect x="920" y="665" width="400" height="128" rx="64" fill="#faf8f2" stroke="#20231f" stroke-opacity=".14"/>
+    <rect x="1080" y="665" width="240" height="128" fill="url(#plus)" clip-path="url(#c6)"/>
+    <rect x="920" y="665" width="220" height="128" fill="url(#fade)" clip-path="url(#c6)"/>
+  </g>
+
+  <g font-family="sans-serif" fill="#20231f">
+    <text x="500" y="292" font-size="10" fill="#77786f">NC-01</text>
+    <text x="500" y="322" font-size="22" font-weight="650">ORIGINAL</text>
+    <text x="500" y="348" font-size="12">画境观屿</text>
+
+    <text x="950" y="292" font-size="10" fill="#77786f">NC-02</text>
+    <text x="950" y="322" font-size="22" font-weight="650">OCEAN</text>
+    <text x="950" y="348" font-size="12">画境观屿</text>
+
+    <text x="500" y="502" font-size="10" fill="#77786f">NC-03</text>
+    <text x="500" y="532" font-size="22" font-weight="650">KLEIN</text>
+    <text x="500" y="558" font-size="12">画境观屿</text>
+
+    <text x="950" y="502" font-size="10" fill="#77786f">NC-04</text>
+    <text x="950" y="532" font-size="22" font-weight="650">ULTRAVIOLET</text>
+    <text x="950" y="558" font-size="12">画境观屿</text>
+
+    <text x="500" y="712" font-size="10" fill="#77786f">NC-05</text>
+    <text x="500" y="742" font-size="22" font-weight="650">CHROME</text>
+    <text x="500" y="768" font-size="12">画境观屿</text>
+
+    <text x="950" y="712" font-size="10" fill="#77786f">NC-06</text>
+    <text x="950" y="742" font-size="22" font-weight="650">PLUS</text>
+    <text x="950" y="768" font-size="12">画境观屿</text>
+  </g>
+
+  <line x1="62" y1="982" x2="1378" y2="982" stroke="#20231f" stroke-opacity=".13"/>
+  <text x="62" y="1020" font-family="monospace" font-size="10" letter-spacing="1.5" fill="#77786f">© 画境观屿 · DIGITAL ART, CODE, EMOTION.</text>
+</svg>
