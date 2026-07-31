@@ -1,108 +1,73 @@
-import { spawn } from 'node:child_process';
 import { createReadStream, existsSync, statSync } from 'node:fs';
 import { createServer } from 'node:http';
-import { extname, join, normalize, relative, sep } from 'node:path';
+import { extname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { spawn } from 'node:child_process';
 
 const root = normalize(join(fileURLToPath(new URL('.', import.meta.url)), '..'));
-const host = process.env.HOST || '127.0.0.1';
-const requestedPort = Number(process.env.PORT || 4173);
-const maxPortAttempts = 30;
-
-if (!Number.isInteger(requestedPort) || requestedPort < 1 || requestedPort > 65535) {
-  console.error(`Invalid PORT: ${process.env.PORT}`);
-  process.exit(1);
-}
-
+const args = process.argv.slice(2);
+const valueAfter = (flag) => {
+  const index = args.indexOf(flag);
+  return index >= 0 ? args[index + 1] : undefined;
+};
+const host = valueAfter('--host') || process.env.HOST || '127.0.0.1';
+const startPort = Number(valueAfter('--port') || process.env.PORT || 4173);
+const strictPort = args.includes('--strictPort');
+const shouldOpen = !args.includes('--no-open');
 const types = new Map([
   ['.html', 'text/html; charset=utf-8'],
   ['.css', 'text/css; charset=utf-8'],
   ['.js', 'text/javascript; charset=utf-8'],
   ['.mjs', 'text/javascript; charset=utf-8'],
-  ['.svg', 'image/svg+xml'],
   ['.png', 'image/png'],
-  ['.webp', 'image/webp'],
+  ['.jpg', 'image/jpeg'],
+  ['.svg', 'image/svg+xml'],
   ['.json', 'application/json; charset=utf-8']
 ]);
 
-const server = createServer((request, response) => {
-  try {
-    const urlPath = decodeURIComponent((request.url || '/').split('?')[0]);
-    const requestedFile = urlPath === '/' ? 'index.html' : urlPath.replace(/^\/+/, '');
-    const candidate = normalize(join(root, requestedFile));
-    const candidateRelative = relative(root, candidate);
-    const escapesRoot = candidateRelative.startsWith(`..${sep}`) || candidateRelative === '..';
+function openBrowser(url) {
+  const platform = process.platform;
+  const command = platform === 'darwin' ? 'open' : platform === 'win32' ? 'cmd' : 'xdg-open';
+  const commandArgs = platform === 'win32' ? ['/c', 'start', '', url] : [url];
+  const child = spawn(command, commandArgs, { detached: true, stdio: 'ignore' });
+  child.on('error', () => {});
+  child.unref();
+}
 
-    if (escapesRoot || !existsSync(candidate) || statSync(candidate).isDirectory()) {
+function createStaticServer() {
+  return createServer((request, response) => {
+    const urlPath = decodeURIComponent((request.url || '/').split('?')[0]);
+    const relative = urlPath === '/' ? 'index.html' : urlPath.replace(/^\/+/, '');
+    const candidate = normalize(join(root, relative));
+    if (!candidate.startsWith(root) || !existsSync(candidate) || statSync(candidate).isDirectory()) {
       response.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' });
       response.end('Not found');
       return;
     }
-
     response.writeHead(200, {
       'content-type': types.get(extname(candidate)) || 'application/octet-stream',
       'cache-control': 'no-store'
     });
     createReadStream(candidate).pipe(response);
-  } catch (error) {
-    response.writeHead(500, { 'content-type': 'text/plain; charset=utf-8' });
-    response.end('Internal server error');
-    console.error(error);
-  }
-});
-
-function openBrowser(url) {
-  if (process.env.NO_OPEN === '1' || process.env.CI) return;
-
-  let command;
-  let args;
-  if (process.platform === 'darwin') {
-    command = 'open';
-    args = [url];
-  } else if (process.platform === 'win32') {
-    command = 'cmd';
-    args = ['/c', 'start', '', url];
-  } else {
-    command = 'xdg-open';
-    args = [url];
-  }
-
-  const child = spawn(command, args, { detached: true, stdio: 'ignore' });
-  child.on('error', () => {
-    // Opening a browser is optional; the server remains usable.
   });
-  child.unref();
 }
 
-function listen(port, remainingAttempts) {
-  const onError = (error) => {
-    server.off('listening', onListening);
-    if (error.code === 'EADDRINUSE' && remainingAttempts > 0) {
-      const nextPort = port + 1;
-      console.warn(`Port ${port} is already in use; trying ${nextPort}...`);
-      listen(nextPort, remainingAttempts - 1);
+function listen(port) {
+  const server = createStaticServer();
+  server.once('error', (error) => {
+    if (error.code === 'EADDRINUSE' && !strictPort) {
+      listen(port + 1);
       return;
     }
-
-    console.error(`Unable to start Nebula Capsules: ${error.message}`);
+    console.error(error);
     process.exitCode = 1;
-  };
-
-  const onListening = () => {
-    server.off('error', onError);
-    const url = `http://${host}:${port}`;
-    console.log(`Nebula Capsules running at ${url}`);
-    console.log('Press Control+C to stop.');
-    openBrowser(url);
-  };
-
-  server.once('error', onError);
-  server.once('listening', onListening);
-  server.listen(port, host);
+  });
+  server.listen(port, host, () => {
+    const browserHost = host === '0.0.0.0' ? '127.0.0.1' : host;
+    const url = `http://${browserHost}:${port}`;
+    console.log(`画境观屿宇宙胶囊已启动：${url}`);
+    if (shouldOpen) openBrowser(url);
+  });
 }
 
-server.on('clientError', (_error, socket) => {
-  socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
-});
-
-listen(requestedPort, maxPortAttempts);
+listen(startPort);
