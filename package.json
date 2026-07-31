@@ -1,6 +1,6 @@
 {
   "name": "nebula-capsules",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "private": false,
   "type": "module",
   "description": "画境观屿：左侧留白信息区与右侧宇宙星云 WebGL 动效结合的开源胶囊界面。",
