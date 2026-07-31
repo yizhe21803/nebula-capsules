@@ -55,9 +55,11 @@ float fbm(vec2 p) {
 
 vec3 palette(float t) {
   t = clamp(t, 0.0, 1.0);
-  vec3 first = mix(u_colorA, u_colorB, smoothstep(0.0, 0.42, t));
-  vec3 second = mix(u_colorC, u_colorD, smoothstep(0.55, 1.0, t));
-  return mix(first, second, smoothstep(0.35, 0.82, t));
+  vec3 shadow = mix(u_colorA, u_colorB, smoothstep(0.06, 0.62, t));
+  vec3 body = mix(u_colorB, u_colorC, smoothstep(0.30, 0.82, t));
+  vec3 highlight = mix(u_colorC, u_colorD, smoothstep(0.74, 1.0, t));
+  vec3 restrained = mix(shadow, body, smoothstep(0.26, 0.72, t));
+  return mix(restrained, highlight, smoothstep(0.78, 0.97, t));
 }
 
 void main() {
@@ -76,31 +78,31 @@ void main() {
   p += normalize(delta + 0.0001) * influence * 0.08;
 
   float t = u_time;
-  vec2 drift = vec2(t * 0.11, -t * 0.065);
+  vec2 drift = vec2(t * 0.22, -t * 0.13);
   vec2 q = vec2(
     fbm(p * 1.35 + drift + u_seed),
-    fbm(p * 1.35 + vec2(5.2, 1.3) - drift * 0.7)
+    fbm(p * 1.35 + vec2(5.2, 1.3) - drift * 0.85)
   );
   vec2 r = vec2(
-    fbm(p * 2.0 + 3.6 * q + vec2(1.7, 9.2) + t * 0.05),
-    fbm(p * 2.0 + 3.0 * q + vec2(8.3, 2.8) - t * 0.04)
+    fbm(p * 2.0 + 3.6 * q + vec2(1.7, 9.2) + t * 0.10),
+    fbm(p * 2.0 + 3.0 * q + vec2(8.3, 2.8) - t * 0.085)
   );
 
   float cloud = fbm(p * 1.7 + 4.2 * r);
-  float veins = fbm(p * 4.3 - 2.2 * q + t * 0.025);
-  float nebula = smoothstep(0.16, 0.93, cloud * 0.86 + veins * 0.34);
+  float veins = fbm(p * 4.0 - 2.0 * q + t * 0.065);
+  float nebula = smoothstep(0.18, 0.91, cloud * 0.9 + veins * 0.22);
 
   vec3 color = palette(nebula);
-  color += u_colorD * pow(max(cloud - 0.56, 0.0), 2.0) * 2.1;
-  color *= 0.68 + 0.52 * smoothstep(0.12, 0.92, veins);
+  color += u_colorD * pow(max(cloud - 0.63, 0.0), 2.0) * 1.05;
+  color *= 0.78 + 0.34 * smoothstep(0.15, 0.9, veins);
 
-  vec2 starGrid = floor((uv + vec2(u_seed * 0.013, 0.0)) * vec2(170.0, 74.0));
-  vec2 starCell = fract(uv * vec2(170.0, 74.0)) - 0.5;
+  vec2 starGrid = floor((uv + vec2(u_seed * 0.013, 0.0)) * vec2(132.0, 58.0));
+  vec2 starCell = fract(uv * vec2(132.0, 58.0)) - 0.5;
   float starRandom = hash21(starGrid);
   float starShape = smoothstep(0.075, 0.0, length(starCell));
-  float starMask = step(0.982, starRandom) * starShape;
+  float starMask = step(0.989, starRandom) * starShape;
   float twinkle = 0.35 + 0.65 * sin(t * (1.0 + starRandom * 2.4) + starRandom * 40.0) * 0.5 + 0.5;
-  color += starMask * twinkle * mix(vec3(0.5, 0.75, 1.0), vec3(1.0, 0.8, 0.55), starRandom) * 1.7;
+  color += starMask * twinkle * mix(u_colorC, u_colorD, starRandom) * 1.05;
 
   float pointerGlow = exp(-distanceToPointer * 7.0) * u_motion;
   color += u_colorD * pointerGlow * 0.28;
@@ -134,7 +136,7 @@ function createProgram(gl) {
   gl.deleteShader(vertex);
   gl.deleteShader(fragment);
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    const message = gl.getProgramInfoLog(program) || 'Unknown shader link error';
+    const message = gl.getProgramInfoLog(program) || 'Unknown program link error';
     gl.deleteProgram(program);
     throw new Error(message);
   }
