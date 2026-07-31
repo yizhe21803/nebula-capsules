@@ -1,57 +1,57 @@
 export const PRESETS = [
   {
-    id: 'aurora-veil',
+    id: 'original',
     code: 'NC-01',
-    name: 'AURORA VEIL',
-    group: 'cold',
+    name: 'ORIGINAL',
+    group: 'warm',
     seed: 1.7,
     speed: 0.5,
-    colors: ['#071321', '#244E78', '#3F91A6', '#A9D9D4']
+    colors: ['#FFF3EA', '#F5B27A', '#F67BC6', '#A978E8']
   },
   {
-    id: 'solar-bloom',
+    id: 'ocean',
     code: 'NC-02',
-    name: 'SOLAR BLOOM',
-    group: 'warm',
+    name: 'OCEAN',
+    group: 'cold',
     seed: 8.2,
-    speed: 0.46,
-    colors: ['#1A0E14', '#7D3740', '#C56B55', '#E8B88E']
+    speed: 0.48,
+    colors: ['#EAF6FF', '#8FD0FF', '#3B87F6', '#6B58E9']
   },
   {
-    id: 'deep-current',
+    id: 'klein',
     code: 'NC-03',
-    name: 'DEEP CURRENT',
+    name: 'KLEIN',
     group: 'cold',
     seed: 14.1,
-    speed: 0.44,
-    colors: ['#040B13', '#173654', '#2B6685', '#9BC1CF']
+    speed: 0.49,
+    colors: ['#EDF2FF', '#2F58D5', '#1B2040', '#E07A43']
   },
   {
-    id: 'violet-drift',
+    id: 'ultraviolet',
     code: 'NC-04',
-    name: 'VIOLET DRIFT',
+    name: 'ULTRAVIOLET',
     group: 'cold',
     seed: 23.4,
-    speed: 0.48,
-    colors: ['#100B18', '#403268', '#715D91', '#C1B5D1']
+    speed: 0.47,
+    colors: ['#F2EEFF', '#B99AF1', '#8F74DB', '#D7D85C']
   },
   {
-    id: 'lunar-smoke',
+    id: 'chrome',
     code: 'NC-05',
-    name: 'LUNAR SMOKE',
+    name: 'CHROME',
     group: 'cold',
     seed: 37.8,
-    speed: 0.4,
-    colors: ['#090B0E', '#29323A', '#69747C', '#D0D5D8']
+    speed: 0.42,
+    colors: ['#F5F6F8', '#B9C0CC', '#7F8793', '#4A4F59']
   },
   {
-    id: 'nova-peach',
+    id: 'plus',
     code: 'NC-06',
-    name: 'NOVA PEACH',
+    name: 'PLUS',
     group: 'warm',
     seed: 51.3,
-    speed: 0.47,
-    colors: ['#190D12', '#743A42', '#AF625B', '#E2B48D']
+    speed: 0.5,
+    colors: ['#FFF0E6', '#F6C26B', '#F98A64', '#E86D74']
   }
 ];
 
