@@ -14,7 +14,7 @@ const closeViewer = document.querySelector('#close-viewer');
 const randomizeButton = document.querySelector('#randomize-button');
 
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-let paused = reduceMotion;
+let paused = false;
 let pageVisible = !document.hidden;
 let viewerRenderer = null;
 let activePreset = PRESETS[0];
@@ -85,7 +85,6 @@ function openViewer(preset) {
   viewer.showModal();
   viewerRenderer?.dispose();
   viewerRenderer = createRenderer(viewerCanvas, preset, { dprCap: 2 });
-  viewerRenderer.motionTarget = 0.22;
 }
 
 function closeActiveViewer() {
@@ -132,15 +131,41 @@ document.addEventListener('visibilitychange', () => {
   pageVisible = !document.hidden;
 });
 
+function driveAutomaticMotion(renderer, index, time) {
+  if (!renderer || !Array.isArray(renderer.pointerTarget)) return;
+
+  // Pointer interaction temporarily owns the effect at motionTarget=1.
+  // When the pointer leaves, the autonomous orbit resumes automatically.
+  if (renderer.motionTarget >= 0.9) return;
+
+  const pace = reduceMotion ? 0.11 : 0.27;
+  const amplitudeX = reduceMotion ? 0.055 : 0.18;
+  const amplitudeY = reduceMotion ? 0.04 : 0.14;
+  const phase = time * pace + index * 1.37;
+
+  renderer.pointerTarget[0] = 0.67 + Math.sin(phase) * amplitudeX;
+  renderer.pointerTarget[1] = 0.5 + Math.cos(phase * 0.82) * amplitudeY;
+  renderer.motionTarget = reduceMotion ? 0.16 : 0.48;
+}
+
 function render(now) {
   if (!paused) frozenTime = (now - accumulatedPause) / 1000;
   if (pageVisible) {
-    for (const renderer of renderers) renderer.draw(frozenTime, paused);
-    viewerRenderer?.draw(frozenTime, paused);
+    renderers.forEach((renderer, index) => {
+      if (!paused) driveAutomaticMotion(renderer, index, frozenTime);
+      renderer.draw(frozenTime, paused);
+    });
+
+    if (viewerRenderer) {
+      const viewerIndex = PRESETS.indexOf(activePreset) + renderers.length;
+      if (!paused) driveAutomaticMotion(viewerRenderer, viewerIndex, frozenTime);
+      viewerRenderer.draw(frozenTime, paused);
+    }
   }
   requestAnimationFrame(render);
 }
 
 pauseButton.setAttribute('aria-pressed', String(paused));
 pauseButton.textContent = paused ? '▶' : 'Ⅱ';
+pauseButton.setAttribute('aria-label', paused ? '继续动效' : '暂停动效');
 requestAnimationFrame(render);
