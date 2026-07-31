@@ -34,12 +34,12 @@ export class FallbackRenderer {
     ctx.fillRect(0, 0, width, height);
 
     ctx.globalCompositeOperation = 'screen';
-    for (let index = 0; index < 8; index += 1) {
-      const x = (0.5 + 0.45 * Math.sin(time * 0.1 + index * 1.7)) * width;
-      const y = (0.5 + 0.4 * Math.cos(time * 0.08 + index)) * height;
+    for (let index = 0; index < 6; index += 1) {
+      const x = (0.5 + 0.45 * Math.sin(time * 0.32 + index * 1.7)) * width;
+      const y = (0.5 + 0.4 * Math.cos(time * 0.25 + index)) * height;
       const radius = Math.max(width, height) * (0.08 + (index % 3) * 0.04);
       const glow = ctx.createRadialGradient(x, y, 0, x, y, radius);
-      glow.addColorStop(0, rgb(this.preset.colors[(index + 1) % 4], 0.35));
+      glow.addColorStop(0, rgb(this.preset.colors[(index + 1) % 4], 0.24));
       glow.addColorStop(1, rgb(this.preset.colors[index % 4], 0));
       ctx.fillStyle = glow;
       ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
