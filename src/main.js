@@ -138,14 +138,14 @@ function driveAutomaticMotion(renderer, index, time) {
   // When the pointer leaves, the autonomous orbit resumes automatically.
   if (renderer.motionTarget >= 0.9) return;
 
-  const pace = reduceMotion ? 0.11 : 0.27;
-  const amplitudeX = reduceMotion ? 0.055 : 0.18;
-  const amplitudeY = reduceMotion ? 0.04 : 0.14;
+  const pace = reduceMotion ? 0.16 : 0.56;
+  const amplitudeX = reduceMotion ? 0.07 : 0.23;
+  const amplitudeY = reduceMotion ? 0.05 : 0.18;
   const phase = time * pace + index * 1.37;
 
   renderer.pointerTarget[0] = 0.67 + Math.sin(phase) * amplitudeX;
   renderer.pointerTarget[1] = 0.5 + Math.cos(phase * 0.82) * amplitudeY;
-  renderer.motionTarget = reduceMotion ? 0.16 : 0.48;
+  renderer.motionTarget = reduceMotion ? 0.2 : 0.68;
 }
 
 function render(now) {
