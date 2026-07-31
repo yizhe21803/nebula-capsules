@@ -2,7 +2,7 @@
 
 Interactive WebGL cosmic fluid materials inside fixed capsule cards.
 
-![Nebula Capsules preview](assets/preview.png)
+![Nebula Capsules preview](assets/preview.svg)
 
 ## Highlights
 

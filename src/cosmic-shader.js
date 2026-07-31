@@ -1,0 +1,267 @@
+import { hexToRgb01 } from './presets.js';
+
+const VERTEX_SHADER = `#version 300 es
+in vec2 a_position;
+out vec2 v_uv;
+void main() {
+  v_uv = a_position * 0.5 + 0.5;
+  gl_Position = vec4(a_position, 0.0, 1.0);
+}`;
+
+const FRAGMENT_SHADER = `#version 300 es
+precision highp float;
+
+in vec2 v_uv;
+out vec4 outColor;
+
+uniform vec2 u_resolution;
+uniform float u_time;
+uniform float u_seed;
+uniform float u_motion;
+uniform vec2 u_pointer;
+uniform vec3 u_colorA;
+uniform vec3 u_colorB;
+uniform vec3 u_colorC;
+uniform vec3 u_colorD;
+
+float hash21(vec2 p) {
+  p = fract(p * vec2(123.34, 456.21));
+  p += dot(p, p + 45.32 + u_seed);
+  return fract(p.x * p.y);
+}
+
+float noise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  float a = hash21(i);
+  float b = hash21(i + vec2(1.0, 0.0));
+  float c = hash21(i + vec2(0.0, 1.0));
+  float d = hash21(i + vec2(1.0, 1.0));
+  return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+}
+
+float fbm(vec2 p) {
+  float value = 0.0;
+  float amplitude = 0.52;
+  mat2 rotation = mat2(0.80, 0.60, -0.60, 0.80);
+  for (int i = 0; i < 6; i++) {
+    value += amplitude * noise(p);
+    p = rotation * p * 2.03 + 17.7;
+    amplitude *= 0.5;
+  }
+  return value;
+}
+
+vec3 palette(float t) {
+  t = clamp(t, 0.0, 1.0);
+  vec3 first = mix(u_colorA, u_colorB, smoothstep(0.0, 0.42, t));
+  vec3 second = mix(u_colorC, u_colorD, smoothstep(0.55, 1.0, t));
+  return mix(first, second, smoothstep(0.35, 0.82, t));
+}
+
+void main() {
+  vec2 uv = v_uv;
+  vec2 p = uv - 0.5;
+  p.x *= u_resolution.x / max(u_resolution.y, 1.0);
+
+  vec2 pointer = u_pointer - 0.5;
+  pointer.x *= u_resolution.x / max(u_resolution.y, 1.0);
+  vec2 delta = p - pointer;
+  float distanceToPointer = length(delta);
+  float influence = exp(-distanceToPointer * 4.6) * u_motion;
+  float angle = influence * 1.7;
+  mat2 swirl = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
+  p = pointer + swirl * delta;
+  p += normalize(delta + 0.0001) * influence * 0.08;
+
+  float t = u_time;
+  vec2 drift = vec2(t * 0.11, -t * 0.065);
+  vec2 q = vec2(
+    fbm(p * 1.35 + drift + u_seed),
+    fbm(p * 1.35 + vec2(5.2, 1.3) - drift * 0.7)
+  );
+  vec2 r = vec2(
+    fbm(p * 2.0 + 3.6 * q + vec2(1.7, 9.2) + t * 0.05),
+    fbm(p * 2.0 + 3.0 * q + vec2(8.3, 2.8) - t * 0.04)
+  );
+
+  float cloud = fbm(p * 1.7 + 4.2 * r);
+  float veins = fbm(p * 4.3 - 2.2 * q + t * 0.025);
+  float nebula = smoothstep(0.16, 0.93, cloud * 0.86 + veins * 0.34);
+
+  vec3 color = palette(nebula);
+  color += u_colorD * pow(max(cloud - 0.56, 0.0), 2.0) * 2.1;
+  color *= 0.68 + 0.52 * smoothstep(0.12, 0.92, veins);
+
+  vec2 starGrid = floor((uv + vec2(u_seed * 0.013, 0.0)) * vec2(170.0, 74.0));
+  vec2 starCell = fract(uv * vec2(170.0, 74.0)) - 0.5;
+  float starRandom = hash21(starGrid);
+  float starShape = smoothstep(0.075, 0.0, length(starCell));
+  float starMask = step(0.982, starRandom) * starShape;
+  float twinkle = 0.35 + 0.65 * sin(t * (1.0 + starRandom * 2.4) + starRandom * 40.0) * 0.5 + 0.5;
+  color += starMask * twinkle * mix(vec3(0.5, 0.75, 1.0), vec3(1.0, 0.8, 0.55), starRandom) * 1.7;
+
+  float pointerGlow = exp(-distanceToPointer * 7.0) * u_motion;
+  color += u_colorD * pointerGlow * 0.28;
+
+  float vignette = smoothstep(0.94, 0.18, length((uv - 0.5) * vec2(1.0, 1.35)));
+  color *= 0.70 + vignette * 0.42;
+  color = pow(color, vec3(0.88));
+
+  outColor = vec4(color, 1.0);
+}`;
+
+function compileShader(gl, type, source) {
+  const shader = gl.createShader(type);
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    const message = gl.getShaderInfoLog(shader) || 'Unknown shader compile error';
+    gl.deleteShader(shader);
+    throw new Error(message);
+  }
+  return shader;
+}
+
+function createProgram(gl) {
+  const vertex = compileShader(gl, gl.VERTEX_SHADER, VERTEX_SHADER);
+  const fragment = compileShader(gl, gl.FRAGMENT_SHADER, FRAGMENT_SHADER);
+  const program = gl.createProgram();
+  gl.attachShader(program, vertex);
+  gl.attachShader(program, fragment);
+  gl.linkProgram(program);
+  gl.deleteShader(vertex);
+  gl.deleteShader(fragment);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    const message = gl.getProgramInfoLog(program) || 'Unknown shader link error';
+    gl.deleteProgram(program);
+    throw new Error(message);
+  }
+  return program;
+}
+
+export class CosmicRenderer {
+  constructor(canvas, preset, options = {}) {
+    this.canvas = canvas;
+    this.preset = { ...preset };
+    this.options = { dprCap: 1.75, ...options };
+    this.gl = canvas.getContext('webgl2', {
+      alpha: false,
+      antialias: false,
+      depth: false,
+      powerPreference: 'high-performance',
+      preserveDrawingBuffer: false
+    });
+    if (!this.gl) throw new Error('WebGL2 is not available');
+
+    this.program = createProgram(this.gl);
+    this.locations = this.#getLocations();
+    this.pointer = [0.72, 0.45];
+    this.pointerTarget = [...this.pointer];
+    this.motion = 0;
+    this.motionTarget = 0;
+    this.timeOffset = preset.seed * 0.73;
+    this.visible = true;
+    this.disposed = false;
+
+    this.#setupGeometry();
+    this.#bindEvents();
+    this.resize();
+  }
+
+  #getLocations() {
+    const gl = this.gl;
+    const uniform = (name) => gl.getUniformLocation(this.program, name);
+    return {
+      position: gl.getAttribLocation(this.program, 'a_position'),
+      resolution: uniform('u_resolution'),
+      time: uniform('u_time'),
+      seed: uniform('u_seed'),
+      motion: uniform('u_motion'),
+      pointer: uniform('u_pointer'),
+      colorA: uniform('u_colorA'),
+      colorB: uniform('u_colorB'),
+      colorC: uniform('u_colorC'),
+      colorD: uniform('u_colorD')
+    };
+  }
+
+  #setupGeometry() {
+    const gl = this.gl;
+    const vertices = new Float32Array([-1, -1, 3, -1, -1, 3]);
+    this.buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+  }
+
+  #bindEvents() {
+    this.onPointerMove = (event) => {
+      const rect = this.canvas.getBoundingClientRect();
+      this.pointerTarget[0] = (event.clientX - rect.left) / Math.max(rect.width, 1);
+      this.pointerTarget[1] = 1 - (event.clientY - rect.top) / Math.max(rect.height, 1);
+      this.motionTarget = 1;
+    };
+    this.onPointerLeave = () => { this.motionTarget = 0; };
+    this.canvas.addEventListener('pointermove', this.onPointerMove, { passive: true });
+    this.canvas.addEventListener('pointerdown', this.onPointerMove, { passive: true });
+    this.canvas.addEventListener('pointerleave', this.onPointerLeave, { passive: true });
+  }
+
+  setPreset(preset) {
+    this.preset = { ...preset };
+    this.timeOffset = preset.seed * 0.73;
+  }
+
+  randomize() {
+    this.preset.seed = Math.random() * 100;
+    this.timeOffset = Math.random() * 40;
+  }
+
+  resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, this.options.dprCap);
+    const rect = this.canvas.getBoundingClientRect();
+    const width = Math.max(2, Math.round(rect.width * dpr));
+    const height = Math.max(2, Math.round(rect.height * dpr));
+    if (this.canvas.width !== width || this.canvas.height !== height) {
+      this.canvas.width = width;
+      this.canvas.height = height;
+      this.gl.viewport(0, 0, width, height);
+    }
+  }
+
+  draw(elapsedSeconds, paused = false) {
+    if (this.disposed || !this.visible) return;
+    this.resize();
+    const gl = this.gl;
+    this.pointer[0] += (this.pointerTarget[0] - this.pointer[0]) * 0.08;
+    this.pointer[1] += (this.pointerTarget[1] - this.pointer[1]) * 0.08;
+    this.motion += (this.motionTarget - this.motion) * 0.07;
+
+    gl.useProgram(this.program);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+    gl.enableVertexAttribArray(this.locations.position);
+    gl.vertexAttribPointer(this.locations.position, 2, gl.FLOAT, false, 0, 0);
+
+    const colors = this.preset.colors.map(hexToRgb01);
+    gl.uniform2f(this.locations.resolution, this.canvas.width, this.canvas.height);
+    gl.uniform1f(this.locations.time, this.timeOffset + (paused ? 0 : elapsedSeconds * this.preset.speed));
+    gl.uniform1f(this.locations.seed, this.preset.seed);
+    gl.uniform1f(this.locations.motion, this.motion);
+    gl.uniform2f(this.locations.pointer, this.pointer[0], this.pointer[1]);
+    gl.uniform3fv(this.locations.colorA, colors[0]);
+    gl.uniform3fv(this.locations.colorB, colors[1]);
+    gl.uniform3fv(this.locations.colorC, colors[2]);
+    gl.uniform3fv(this.locations.colorD, colors[3]);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  dispose() {
+    this.disposed = true;
+    this.canvas.removeEventListener('pointermove', this.onPointerMove);
+    this.canvas.removeEventListener('pointerdown', this.onPointerMove);
+    this.canvas.removeEventListener('pointerleave', this.onPointerLeave);
+    this.gl.deleteBuffer(this.buffer);
+    this.gl.deleteProgram(this.program);
+  }
+}
