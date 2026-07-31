@@ -4,6 +4,8 @@
 
 Six realtime generative cosmic-fluid capsules: **Original, Ocean, Klein, Ultraviolet, Chrome, and Plus**. The page includes WebGL2 fluid rendering, autoplay, pointer/touch gravity, pause controls, filtering, and an immersive viewer.
 
+![Huajing Guanyu Cosmic Capsules preview](assets/preview-v1.0.3.svg)
+
 ## One-click launchers (recommended)
 
 After extracting the source package, open the following folder:
