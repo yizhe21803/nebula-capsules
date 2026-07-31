@@ -5,8 +5,8 @@ export const PRESETS = [
     name: 'AURORA VEIL',
     group: 'cold',
     seed: 1.7,
-    speed: 0.16,
-    colors: ['#061326', '#5b38df', '#34d9ff', '#8bffe9']
+    speed: 0.5,
+    colors: ['#071321', '#244E78', '#3F91A6', '#A9D9D4']
   },
   {
     id: 'solar-bloom',
@@ -14,8 +14,8 @@ export const PRESETS = [
     name: 'SOLAR BLOOM',
     group: 'warm',
     seed: 8.2,
-    speed: 0.13,
-    colors: ['#160a24', '#fa5f8b', '#ffb04f', '#fbe3b1']
+    speed: 0.46,
+    colors: ['#1A0E14', '#7D3740', '#C56B55', '#E8B88E']
   },
   {
     id: 'deep-current',
@@ -23,8 +23,8 @@ export const PRESETS = [
     name: 'DEEP CURRENT',
     group: 'cold',
     seed: 14.1,
-    speed: 0.12,
-    colors: ['#030a19', '#122fc6', '#167bff', '#b9ddff']
+    speed: 0.44,
+    colors: ['#040B13', '#173654', '#2B6685', '#9BC1CF']
   },
   {
     id: 'violet-drift',
@@ -32,8 +32,8 @@ export const PRESETS = [
     name: 'VIOLET DRIFT',
     group: 'cold',
     seed: 23.4,
-    speed: 0.14,
-    colors: ['#100524', '#6c35ff', '#c451ff', '#6ecbff']
+    speed: 0.48,
+    colors: ['#100B18', '#403268', '#715D91', '#C1B5D1']
   },
   {
     id: 'lunar-smoke',
@@ -41,8 +41,8 @@ export const PRESETS = [
     name: 'LUNAR SMOKE',
     group: 'cold',
     seed: 37.8,
-    speed: 0.1,
-    colors: ['#090a10', '#273248', '#8392aa', '#eef5ff']
+    speed: 0.4,
+    colors: ['#090B0E', '#29323A', '#69747C', '#D0D5D8']
   },
   {
     id: 'nova-peach',
@@ -50,8 +50,8 @@ export const PRESETS = [
     name: 'NOVA PEACH',
     group: 'warm',
     seed: 51.3,
-    speed: 0.15,
-    colors: ['#160922', '#ff496f', '#ff8f55', '#ffd58a']
+    speed: 0.47,
+    colors: ['#190D12', '#743A42', '#AF625B', '#E2B48D']
   }
 ];
 
