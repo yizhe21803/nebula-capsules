@@ -8,13 +8,20 @@
 
 ### macOS
 
-解压后，双击项目根目录中的：
+使用项目发布的本地修复包时，解压后双击项目根目录中的：
 
 ```text
 start.command
 ```
 
 程序会自动寻找可用端口并打开浏览器。第一次运行若被 macOS 阻止，可右键 `start.command`，选择“打开”。
+
+通过 GitHub `git clone` 获取项目后，第一次运行先执行：
+
+```bash
+chmod +x start.command
+./start.command
+```
 
 ### Windows
 
