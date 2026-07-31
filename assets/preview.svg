@@ -1,104 +1,34 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#fbfaf8"/>
-      <stop offset="1" stop-color="#f2f0f5"/>
-    </linearGradient>
-    <filter id="shadow" x="-20%" y="-40%" width="140%" height="180%">
-      <feDropShadow dx="0" dy="16" stdDeviation="16" flood-color="#2c2548" flood-opacity=".10"/>
-    </filter>
-    <linearGradient id="n1" x1="0" y1=".3" x2="1" y2=".7">
-      <stop offset="0" stop-color="#fff3e8"/><stop offset=".25" stop-color="#f7a876"/><stop offset=".58" stop-color="#ff71bf"/><stop offset="1" stop-color="#7d42d8"/>
-    </linearGradient>
-    <linearGradient id="n2" x1="0" y1=".6" x2="1" y2=".25">
-      <stop offset="0" stop-color="#e7f7ff"/><stop offset=".28" stop-color="#45d7ff"/><stop offset=".62" stop-color="#2477ff"/><stop offset="1" stop-color="#8e43f0"/>
-    </linearGradient>
-    <linearGradient id="n3" x1="0" y1=".2" x2="1" y2=".8">
-      <stop offset="0" stop-color="#dbe7ff"/><stop offset=".3" stop-color="#2650e8"/><stop offset=".55" stop-color="#141536"/><stop offset=".78" stop-color="#f08a50"/><stop offset="1" stop-color="#9c56ff"/>
-    </linearGradient>
-    <linearGradient id="n4" x1="0" y1=".7" x2="1" y2=".2">
-      <stop offset="0" stop-color="#edf1ff"/><stop offset=".25" stop-color="#6a7cff"/><stop offset=".58" stop-color="#d1a7ff"/><stop offset="1" stop-color="#5d34c8"/>
-    </linearGradient>
-    <linearGradient id="n5" x1="0" y1=".2" x2="1" y2=".7">
-      <stop offset="0" stop-color="#f4f5f8"/><stop offset=".35" stop-color="#adb9c7"/><stop offset=".65" stop-color="#5f7689"/><stop offset="1" stop-color="#e1e6eb"/>
-    </linearGradient>
-    <linearGradient id="n6" x1="0" y1=".6" x2="1" y2=".25">
-      <stop offset="0" stop-color="#fff0e5"/><stop offset=".3" stop-color="#ff8a5e"/><stop offset=".62" stop-color="#ff6385"/><stop offset="1" stop-color="#ffd7a4"/>
-    </linearGradient>
-    <linearGradient id="fade" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#fbfaf8" stop-opacity="1"/><stop offset=".72" stop-color="#fbfaf8" stop-opacity="1"/><stop offset="1" stop-color="#fbfaf8" stop-opacity="0"/>
-    </linearGradient>
-    <clipPath id="c1"><rect x="520" y="205" width="430" height="122" rx="61"/></clipPath>
-    <clipPath id="c2"><rect x="1040" y="205" width="430" height="122" rx="61"/></clipPath>
-    <clipPath id="c3"><rect x="520" y="410" width="430" height="122" rx="61"/></clipPath>
-    <clipPath id="c4"><rect x="1040" y="410" width="430" height="122" rx="61"/></clipPath>
-    <clipPath id="c5"><rect x="520" y="615" width="430" height="122" rx="61"/></clipPath>
-    <clipPath id="c6"><rect x="1040" y="615" width="430" height="122" rx="61"/></clipPath>
-  </defs>
-  <rect width="1600" height="1000" fill="url(#bg)"/>
-  <text x="66" y="62" font-family="monospace" font-size="13" letter-spacing="2" fill="#29282e">GENERATIVE COSMIC STUDIES</text>
-  <text x="66" y="140" font-family="sans-serif" font-size="70" font-weight="800" letter-spacing="-6" fill="#19191d">画境观屿</text>
-  <line x1="66" y1="175" x2="1534" y2="175" stroke="#1c1c20" stroke-opacity=".12"/>
-
-  <text x="66" y="258" font-family="monospace" font-size="15" font-weight="700" letter-spacing="1.5" fill="#1d1d22">COSMOS AS</text>
-  <text x="66" y="282" font-family="monospace" font-size="15" font-weight="700" letter-spacing="1.5" fill="#1d1d22">A LIVING SYSTEM.</text>
-  <text x="66" y="332" font-family="sans-serif" font-size="28" font-weight="700" fill="#1d1d22">让宇宙材质，</text>
-  <text x="66" y="370" font-family="sans-serif" font-size="28" font-weight="700" fill="#1d1d22">在固定容器里“活”起来。</text>
-  <text x="66" y="418" font-family="sans-serif" font-size="14" fill="#77747d">左侧留白展示文字，右侧星云持续流动。</text>
-  <text x="66" y="444" font-family="sans-serif" font-size="14" fill="#77747d">拖动指针可制造轻微引力扰动。</text>
-  <rect x="66" y="530" width="260" height="42" rx="21" fill="#18181c"/>
-  <text x="94" y="556" font-family="monospace" font-size="11" fill="#fff">●  ALL</text>
-  <text x="178" y="556" font-family="monospace" font-size="11" fill="#aaa7af">COLD</text>
-  <text x="257" y="556" font-family="monospace" font-size="11" fill="#aaa7af">WARM</text>
-  <text x="66" y="640" font-family="monospace" font-size="11" fill="#76737c">○ ORIGINAL  原始版本</text>
-  <text x="66" y="684" font-family="monospace" font-size="11" fill="#76737c">○ OCEAN     深海</text>
-  <text x="66" y="728" font-family="monospace" font-size="11" fill="#76737c">○ AURORA    极光</text>
-  <text x="66" y="772" font-family="monospace" font-size="11" fill="#76737c">○ CHROME    铬银</text>
-  <text x="66" y="826" font-family="monospace" font-size="11" fill="#76737c">06 / 06</text>
-
-  <g font-family="monospace" font-size="11" fill="#202027">
-    <text x="550" y="190">ORIGINAL / 原始版本</text><text x="1070" y="190">OCEAN / 深海</text>
-    <text x="550" y="395">AURORA / 极光</text><text x="1070" y="395">ULTRAVIOLET / 紫外</text>
-    <text x="550" y="600">CHROME / 铬银</text><text x="1070" y="600">PLUS / 热光</text>
-  </g>
-
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1080" viewBox="0 0 1440 1080">
+  <rect width="1440" height="1080" fill="#f3f0e8"/>
+  <text x="62" y="58" font-family="monospace" font-size="12" letter-spacing="2" fill="#77786f">GENERATIVE COLOR STUDIES</text>
+  <text x="62" y="118" font-family="sans-serif" font-size="54" font-weight="600" letter-spacing="2" fill="#20231f">画境观屿</text>
+  <text x="62" y="148" font-family="monospace" font-size="11" letter-spacing="2" fill="#77786f">COSMIC CAPSULES</text>
+  <line x1="62" y1="184" x2="1378" y2="184" stroke="#20231f" stroke-opacity=".13"/>
+  <text x="62" y="260" font-family="monospace" font-size="13" font-weight="700" letter-spacing="1.6" fill="#20231f">COLOR AS A LIVING SYSTEM.</text>
+  <text x="62" y="315" font-family="sans-serif" font-size="32" font-weight="650" fill="#20231f">让固定的形状，</text>
+  <text x="62" y="358" font-family="sans-serif" font-size="32" font-weight="650" fill="#20231f">拥有会呼吸的宇宙。</text>
   <g>
-    <rect x="520" y="205" width="430" height="122" rx="61" fill="#fbfaf8" stroke="#1d1d22" stroke-opacity=".14"/>
-    <rect x="680" y="205" width="270" height="122" fill="url(#n1)" clip-path="url(#c1)"/>
-    <rect x="520" y="205" width="220" height="122" fill="url(#fade)" clip-path="url(#c1)"/>
-
-    <rect x="1040" y="205" width="430" height="122" rx="61" fill="#fbfaf8" stroke="#1d1d22" stroke-opacity=".14"/>
-    <rect x="1200" y="205" width="270" height="122" fill="url(#n2)" clip-path="url(#c2)"/>
-    <rect x="1040" y="205" width="220" height="122" fill="url(#fade)" clip-path="url(#c2)"/>
-
-    <rect x="520" y="410" width="430" height="122" rx="61" fill="#fbfaf8" stroke="#1d1d22" stroke-opacity=".14"/>
-    <rect x="680" y="410" width="270" height="122" fill="url(#n3)" clip-path="url(#c3)"/>
-    <rect x="520" y="410" width="220" height="122" fill="url(#fade)" clip-path="url(#c3)"/>
-
-    <rect x="1040" y="410" width="430" height="122" rx="61" fill="#fbfaf8" stroke="#1d1d22" stroke-opacity=".14"/>
-    <rect x="1200" y="410" width="270" height="122" fill="url(#n4)" clip-path="url(#c4)"/>
-    <rect x="1040" y="410" width="220" height="122" fill="url(#fade)" clip-path="url(#c4)"/>
-
-    <rect x="520" y="615" width="430" height="122" rx="61" fill="#fbfaf8" stroke="#1d1d22" stroke-opacity=".14"/>
-    <rect x="680" y="615" width="270" height="122" fill="url(#n5)" clip-path="url(#c5)"/>
-    <rect x="520" y="615" width="220" height="122" fill="url(#fade)" clip-path="url(#c5)"/>
-
-    <rect x="1040" y="615" width="430" height="122" rx="61" fill="#fbfaf8" stroke="#1d1d22" stroke-opacity=".14"/>
-    <rect x="1200" y="615" width="270" height="122" fill="url(#n6)" clip-path="url(#c6)"/>
-    <rect x="1040" y="615" width="220" height="122" fill="url(#fade)" clip-path="url(#c6)"/>
+    <rect x="470" y="245" width="400" height="128" rx="64" fill="#faf8f2" stroke="#20231f" stroke-opacity=".14"/>
+    <rect x="630" y="245" width="240" height="128" rx="0" fill="#a978e8"/>
+    <rect x="920" y="245" width="400" height="128" rx="64" fill="#faf8f2" stroke="#20231f" stroke-opacity=".14"/>
+    <rect x="1080" y="245" width="240" height="128" rx="0" fill="#3b87f6"/>
+    <rect x="470" y="455" width="400" height="128" rx="64" fill="#faf8f2" stroke="#20231f" stroke-opacity=".14"/>
+    <rect x="630" y="455" width="240" height="128" rx="0" fill="#2f58d5"/>
+    <rect x="920" y="455" width="400" height="128" rx="64" fill="#faf8f2" stroke="#20231f" stroke-opacity=".14"/>
+    <rect x="1080" y="455" width="240" height="128" rx="0" fill="#b99af1"/>
+    <rect x="470" y="665" width="400" height="128" rx="64" fill="#faf8f2" stroke="#20231f" stroke-opacity=".14"/>
+    <rect x="630" y="665" width="240" height="128" rx="0" fill="#7f8793"/>
+    <rect x="920" y="665" width="400" height="128" rx="64" fill="#faf8f2" stroke="#20231f" stroke-opacity=".14"/>
+    <rect x="1080" y="665" width="240" height="128" rx="0" fill="#f98a64"/>
   </g>
-
-  <g font-family="sans-serif" fill="#1c1c21">
-    <text x="552" y="258" font-size="25" font-weight="800" letter-spacing="-2">画境观屿</text><text x="552" y="280" font-family="monospace" font-size="8" fill="#77747d">HUA JING GUAN YU</text><text x="552" y="297" font-family="monospace" font-size="8" fill="#ca637c">LIVE COSMIC STUDY</text>
-    <text x="1072" y="258" font-size="25" font-weight="800" letter-spacing="-2">画境观屿</text><text x="1072" y="280" font-family="monospace" font-size="8" fill="#77747d">HUA JING GUAN YU</text><text x="1072" y="297" font-family="monospace" font-size="8" fill="#ca637c">LIVE COSMIC STUDY</text>
-    <text x="552" y="463" font-size="25" font-weight="800" letter-spacing="-2">画境观屿</text><text x="552" y="485" font-family="monospace" font-size="8" fill="#77747d">HUA JING GUAN YU</text><text x="552" y="502" font-family="monospace" font-size="8" fill="#ca637c">LIVE COSMIC STUDY</text>
-    <text x="1072" y="463" font-size="25" font-weight="800" letter-spacing="-2">画境观屿</text><text x="1072" y="485" font-family="monospace" font-size="8" fill="#77747d">HUA JING GUAN YU</text><text x="1072" y="502" font-family="monospace" font-size="8" fill="#ca637c">LIVE COSMIC STUDY</text>
-    <text x="552" y="668" font-size="25" font-weight="800" letter-spacing="-2">画境观屿</text><text x="552" y="690" font-family="monospace" font-size="8" fill="#77747d">HUA JING GUAN YU</text><text x="552" y="707" font-family="monospace" font-size="8" fill="#ca637c">LIVE COSMIC STUDY</text>
-    <text x="1072" y="668" font-size="25" font-weight="800" letter-spacing="-2">画境观屿</text><text x="1072" y="690" font-family="monospace" font-size="8" fill="#77747d">HUA JING GUAN YU</text><text x="1072" y="707" font-family="monospace" font-size="8" fill="#ca637c">LIVE COSMIC STUDY</text>
+  <g font-family="sans-serif" fill="#20231f" font-size="20" font-weight="650">
+    <text x="500" y="322">ORIGINAL</text>
+    <text x="950" y="322">OCEAN</text>
+    <text x="500" y="532">KLEIN</text>
+    <text x="950" y="532">ULTRAVIOLET</text>
+    <text x="500" y="742">CHROME</text>
+    <text x="950" y="742">PLUS</text>
   </g>
-  <g fill="#202027" stroke="#fff" stroke-width="1">
-    <circle cx="935" cy="219" r="10"/><circle cx="1455" cy="219" r="10"/><circle cx="935" cy="424" r="10"/><circle cx="1455" cy="424" r="10"/><circle cx="935" cy="629" r="10"/><circle cx="1455" cy="629" r="10"/>
-  </g>
-  <line x1="66" y1="906" x2="1534" y2="906" stroke="#1c1c20" stroke-opacity=".12"/>
-  <text x="66" y="944" font-family="monospace" font-size="10" letter-spacing="1.5" fill="#6f6c75">© 画境观屿 · DIGITAL ART, CODE, EMOTION.</text>
+  <line x1="62" y1="982" x2="1378" y2="982" stroke="#20231f" stroke-opacity=".13"/>
+  <text x="62" y="1020" font-family="monospace" font-size="10" letter-spacing="1.5" fill="#77786f">© 画境观屿 · DIGITAL ART, CODE, EMOTION.</text>
 </svg>
