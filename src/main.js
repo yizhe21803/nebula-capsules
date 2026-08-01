@@ -9,6 +9,7 @@ const pauseIcon = pauseButton.querySelector('.pause-icon');
 const pauseLabel = pauseButton.querySelector('.pause-label');
 const shuffleButton = document.querySelector('#shuffle-button');
 const visibleCount = document.querySelector('#visible-count');
+const totalCount = document.querySelector('#total-count');
 const viewer = document.querySelector('#viewer');
 const viewerCanvas = document.querySelector('#viewer-canvas');
 const viewerTitle = document.querySelector('#viewer-title');
@@ -51,7 +52,11 @@ function createCard(preset) {
   card.type = 'button';
   card.className = 'capsule-card';
   card.dataset.group = preset.group;
+  card.dataset.mode = preset.mode || 'nebula';
   card.setAttribute('aria-label', `打开 ${preset.name} 沉浸预览`);
+  const subtitle = preset.subtitle || '画境观屿';
+  const brandLine = preset.subtitle ? 'SOFT AURORA CAPSULE' : 'HUA JING GUAN YU';
+  const studyLine = preset.mode === 'aurora' ? 'LIVE AURORA STUDY' : 'LIVE COSMIC STUDY';
   card.innerHTML = `
     <span class="card-topline">
       <span><span class="card-code">${preset.code}</span> <strong>${preset.name}</strong></span>
@@ -61,9 +66,9 @@ function createCard(preset) {
       <span class="card-copy">
         <span class="card-code-inside">${preset.code}</span>
         <span class="card-name">${preset.name}</span>
-        <span class="card-brand">画境观屿</span>
-        <span class="card-brand-en">HUA JING GUAN YU</span>
-        <span class="card-state">LIVE COSMIC STUDY</span>
+        <span class="card-brand">${subtitle}</span>
+        <span class="card-brand-en">${brandLine}</span>
+        <span class="card-state">${studyLine}</span>
       </span>
       <span class="capsule-visual"><canvas aria-hidden="true"></canvas></span>
     </span>
@@ -82,6 +87,10 @@ for (const preset of PRESETS) {
   item.textContent = `${preset.code} ${preset.name}`;
   indexList.append(item);
 }
+
+const totalText = String(PRESETS.length).padStart(2, '0');
+visibleCount.textContent = totalText;
+totalCount.textContent = totalText;
 
 const observer = new IntersectionObserver((entries) => {
   for (const entry of entries) {
