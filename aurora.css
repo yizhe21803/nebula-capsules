@@ -1,0 +1,54 @@
+.capsule-card[data-mode="aurora"] .capsule-visual::after {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), transparent 48%, rgba(255, 255, 255, 0.08));
+  mix-blend-mode: screen;
+}
+
+.capsule-card[data-mode="aurora"] .card-brand {
+  margin-top: 9px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 9px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+}
+
+.capsule-card[data-mode="aurora"] .card-brand-en,
+.capsule-card[data-mode="aurora"] .card-state {
+  font-size: 6px;
+}
+
+.capsule-card[data-theme="dark"] .capsule-stage {
+  border-color: rgba(255, 255, 255, 0.09);
+  background: #202126;
+  box-shadow: 0 18px 44px rgba(16, 18, 24, 0.18), 0 3px 10px rgba(16, 18, 24, 0.12);
+}
+
+.capsule-card[data-theme="dark"] .card-copy {
+  color: #ffffff;
+  background: linear-gradient(
+    90deg,
+    #202126 0%,
+    #202126 72%,
+    rgba(32, 33, 38, 0.98) 84%,
+    rgba(32, 33, 38, 0) 100%
+  );
+}
+
+.capsule-card[data-theme="dark"] .card-code-inside,
+.capsule-card[data-theme="dark"] .card-brand,
+.capsule-card[data-theme="dark"] .card-brand-en {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.capsule-card[data-theme="dark"] .card-state {
+  color: #6be7dc;
+}
+
+@media (max-width: 760px) {
+  .capsule-card[data-mode="aurora"] .card-brand {
+    font-size: 8px;
+  }
+
+  .capsule-card[data-mode="aurora"] .card-brand-en {
+    display: none;
+  }
+}
