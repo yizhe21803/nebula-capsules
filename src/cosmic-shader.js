@@ -114,72 +114,86 @@ vec3 renderNebula(vec2 uv, vec2 p, vec2 pointer, float distanceToPointer, float 
 }
 
 vec3 renderPolar(vec2 uv, float distanceToPointer, float t) {
-  float phase = t * 0.72 + u_seed * 0.063;
-  float rightField = smoothstep(0.18, 0.98, uv.x);
-  float grain = fbm(vec2(uv.x * 1.55 - phase * 0.08, uv.y * 2.15 + phase * 0.06) + u_seed) - 0.5;
+  float phase = t * 1.08 + u_seed * 0.063;
+  float rightField = smoothstep(0.06, 0.96, uv.x);
+  float grain = fbm(vec2(uv.x * 1.85 - phase * 0.14, uv.y * 2.45 + phase * 0.10) + u_seed) - 0.5;
 
-  float orangeCenter = 0.74 - uv.x * 0.18 + sin(phase + uv.x * 3.2) * 0.08 + grain * 0.11;
-  float magentaCenter = 0.38 + uv.x * 0.11 + sin(phase * 0.77 + uv.x * 4.0 + 1.1) * 0.10 - grain * 0.10;
-  float lowerCenter = 0.16 + sin(phase * 0.56 + uv.x * 3.1) * 0.06;
+  float orangeCenter = 0.76 - uv.x * 0.20 + sin(phase + uv.x * 3.7) * 0.14 + grain * 0.16;
+  float magentaCenter = 0.37 + uv.x * 0.13 + sin(phase * 0.84 + uv.x * 4.7 + 1.1) * 0.16 - grain * 0.14;
+  float lowerCenter = 0.13 + sin(phase * 0.72 + uv.x * 3.8) * 0.10;
+  float sweepCenter = 0.54 + sin(phase * 1.22 + uv.x * 5.4) * 0.08;
 
-  float orangeBand = gaussian(uv.y, orangeCenter, 0.055);
-  float magentaBand = gaussian(uv.y, magentaCenter, 0.080);
-  float lowerBand = gaussian(uv.y, lowerCenter, 0.050);
+  float orangeBand = gaussian(uv.y, orangeCenter, 0.074);
+  float magentaBand = gaussian(uv.y, magentaCenter, 0.115);
+  float lowerBand = gaussian(uv.y, lowerCenter, 0.070);
+  float sweepBand = gaussian(uv.y, sweepCenter, 0.027) * smoothstep(0.28, 0.98, uv.x);
 
-  float whiteCore = exp(-length((uv - vec2(0.965 + sin(phase * 0.45) * 0.018, 0.62 + cos(phase * 0.62) * 0.08)) * vec2(2.5, 1.15)) * 8.0);
-  float pulse = 0.88 + sin(phase * 1.35) * 0.12;
-  float pointerBend = exp(-distanceToPointer * 7.0) * u_motion;
+  vec2 corePosition = vec2(
+    0.945 + sin(phase * 0.68) * 0.052,
+    0.60 + cos(phase * 0.83) * 0.145
+  );
+  float whiteCore = exp(-length((uv - corePosition) * vec2(2.05, 0.94)) * 6.1);
+  float secondaryCore = exp(-length((uv - vec2(0.90 + cos(phase * 0.47) * 0.055, 0.27 + sin(phase * 0.64) * 0.08)) * vec2(2.4, 1.15)) * 7.0);
+  float pulse = 0.72 + sin(phase * 1.62) * 0.28;
+  float pointerBend = exp(-distanceToPointer * 6.4) * u_motion;
 
   vec3 color = u_colorA;
-  color = mix(color, u_colorB, clamp(orangeBand * rightField * 0.92, 0.0, 1.0));
-  color = mix(color, u_colorC, clamp((magentaBand * 0.92 + lowerBand * 0.58) * rightField, 0.0, 1.0));
-  color += u_colorD * whiteCore * pulse * 0.95;
-  color += u_colorC * pointerBend * rightField * 0.14;
-  color += mix(u_colorB, u_colorC, 0.55) * smoothstep(0.42, 0.96, grain + 0.5) * rightField * 0.10;
+  color = mix(color, u_colorB, clamp(orangeBand * rightField * 1.16, 0.0, 1.0));
+  color = mix(color, u_colorC, clamp((magentaBand * 1.18 + lowerBand * 0.82) * rightField, 0.0, 1.0));
+  color += u_colorD * whiteCore * pulse * 1.30;
+  color += mix(u_colorD, u_colorC, 0.30) * secondaryCore * 0.58;
+  color += mix(u_colorD, u_colorC, 0.55) * sweepBand * 0.42;
+  color += u_colorC * pointerBend * rightField * 0.24;
+  color += mix(u_colorB, u_colorC, 0.55) * smoothstep(0.35, 0.94, grain + 0.5) * rightField * 0.18;
   return color;
 }
 
 vec3 renderDubdot(vec2 uv, float distanceToPointer, float t) {
-  float phase = t * 0.54 + u_seed * 0.051;
-  float rightField = smoothstep(0.30, 0.98, uv.x);
-  float drift = fbm(vec2(uv.x * 1.05 - phase * 0.055, uv.y * 1.75 + phase * 0.04) + u_seed) - 0.5;
+  float phase = t * 0.86 + u_seed * 0.051;
+  float rightField = smoothstep(0.16, 0.97, uv.x);
+  float drift = fbm(vec2(uv.x * 1.25 - phase * 0.105, uv.y * 1.95 + phase * 0.075) + u_seed) - 0.5;
 
-  float upperCenter = 0.69 - uv.x * 0.14 + sin(phase + uv.x * 2.8) * 0.065 + drift * 0.10;
-  float lowerCenter = 0.31 + uv.x * 0.08 + cos(phase * 0.78 + uv.x * 2.5) * 0.070 - drift * 0.08;
-  float upperBand = gaussian(uv.y, upperCenter, 0.095);
-  float lowerBand = gaussian(uv.y, lowerCenter, 0.105);
-  float softBody = exp(-length((uv - vec2(0.91 + sin(phase * 0.38) * 0.025, 0.51)) * vec2(1.65, 0.82)) * 3.5);
-  float pointerBend = exp(-distanceToPointer * 7.5) * u_motion;
+  float upperCenter = 0.72 - uv.x * 0.18 + sin(phase + uv.x * 3.4) * 0.115 + drift * 0.15;
+  float lowerCenter = 0.28 + uv.x * 0.11 + cos(phase * 0.88 + uv.x * 3.2) * 0.125 - drift * 0.12;
+  float middleCenter = 0.50 + sin(phase * 1.18 + uv.x * 4.8) * 0.075;
+  float upperBand = gaussian(uv.y, upperCenter, 0.115);
+  float lowerBand = gaussian(uv.y, lowerCenter, 0.125);
+  float middleBand = gaussian(uv.y, middleCenter, 0.052) * smoothstep(0.34, 0.98, uv.x);
+  float softBody = exp(-length((uv - vec2(0.87 + sin(phase * 0.52) * 0.065, 0.51 + cos(phase * 0.44) * 0.045)) * vec2(1.42, 0.72)) * 2.85);
+  float pointerBend = exp(-distanceToPointer * 6.8) * u_motion;
 
   vec3 color = u_colorA;
-  color = mix(color, u_colorB, clamp(softBody * rightField * 0.58, 0.0, 1.0));
-  color = mix(color, u_colorC, clamp(upperBand * rightField * 0.50, 0.0, 1.0));
-  color = mix(color, u_colorD, clamp((lowerBand * 0.58 + softBody * 0.36) * rightField, 0.0, 1.0));
-  color = mix(color, vec3(1.0), smoothstep(0.0, 0.42, 1.0 - rightField) * 0.34);
-  color += u_colorD * pointerBend * rightField * 0.08;
+  color = mix(color, u_colorB, clamp(softBody * rightField * 0.74, 0.0, 1.0));
+  color = mix(color, u_colorC, clamp((upperBand * 0.76 + middleBand * 0.28) * rightField, 0.0, 1.0));
+  color = mix(color, u_colorD, clamp((lowerBand * 0.82 + softBody * 0.46 + middleBand * 0.34) * rightField, 0.0, 1.0));
+  color += mix(u_colorC, u_colorD, 0.58) * middleBand * rightField * 0.18;
+  color = mix(color, vec3(1.0), smoothstep(0.0, 0.34, 1.0 - rightField) * 0.24);
+  color += u_colorD * pointerBend * rightField * 0.15;
   return color;
 }
 
 vec3 renderVercel(vec2 uv, float distanceToPointer, float t) {
-  float phase = t * 0.38 + u_seed * 0.044;
-  float rightField = smoothstep(0.27, 0.99, uv.x);
-  float haze = fbm(vec2(uv.x * 0.72 - phase * 0.035, uv.y * 1.12 + phase * 0.026) + u_seed) - 0.5;
+  float phase = t * 0.62 + u_seed * 0.044;
+  float rightField = smoothstep(0.14, 0.98, uv.x);
+  float haze = fbm(vec2(uv.x * 0.90 - phase * 0.075, uv.y * 1.35 + phase * 0.052) + u_seed) - 0.5;
 
-  vec2 mintPos = vec2(0.88 + sin(phase * 0.55) * 0.035, 0.78 + cos(phase * 0.47) * 0.035);
-  vec2 goldPos = vec2(0.90 + cos(phase * 0.41) * 0.030, 0.52 + sin(phase * 0.36) * 0.045);
-  vec2 pinkPos = vec2(0.86 + sin(phase * 0.33 + 1.7) * 0.045, 0.23 + cos(phase * 0.40) * 0.035);
+  vec2 mintPos = vec2(0.84 + sin(phase * 0.73) * 0.075, 0.78 + cos(phase * 0.62) * 0.075);
+  vec2 goldPos = vec2(0.88 + cos(phase * 0.58) * 0.070, 0.51 + sin(phase * 0.52) * 0.095);
+  vec2 pinkPos = vec2(0.82 + sin(phase * 0.49 + 1.7) * 0.090, 0.22 + cos(phase * 0.57) * 0.075);
 
-  float mintCloud = exp(-length((uv - mintPos) * vec2(1.35, 0.78)) * 3.6);
-  float goldCloud = exp(-length((uv - goldPos) * vec2(1.28, 0.72)) * 3.4);
-  float pinkCloud = exp(-length((uv - pinkPos) * vec2(1.20, 0.76)) * 3.3);
-  float pointerBend = exp(-distanceToPointer * 8.0) * u_motion;
+  float mintCloud = exp(-length((uv - mintPos) * vec2(1.14, 0.66)) * 2.85);
+  float goldCloud = exp(-length((uv - goldPos) * vec2(1.08, 0.64)) * 2.70);
+  float pinkCloud = exp(-length((uv - pinkPos) * vec2(1.02, 0.66)) * 2.62);
+  float diagonalHaze = gaussian(uv.y, 0.62 - uv.x * 0.24 + sin(phase + uv.x * 3.1) * 0.09, 0.13);
+  float pointerBend = exp(-distanceToPointer * 7.2) * u_motion;
 
   vec3 color = u_colorA;
-  color = mix(color, u_colorB, clamp((mintCloud + haze * 0.08) * rightField * 0.48, 0.0, 1.0));
-  color = mix(color, u_colorC, clamp(goldCloud * rightField * 0.50, 0.0, 1.0));
-  color = mix(color, u_colorD, clamp(pinkCloud * rightField * 0.44, 0.0, 1.0));
-  color = mix(color, vec3(1.0), 0.10);
-  color += mix(u_colorB, u_colorD, 0.5) * pointerBend * rightField * 0.045;
+  color = mix(color, u_colorB, clamp((mintCloud + haze * 0.15) * rightField * 0.68, 0.0, 1.0));
+  color = mix(color, u_colorC, clamp((goldCloud + diagonalHaze * 0.22) * rightField * 0.70, 0.0, 1.0));
+  color = mix(color, u_colorD, clamp((pinkCloud + diagonalHaze * 0.18) * rightField * 0.64, 0.0, 1.0));
+  color += mix(u_colorB, u_colorC, 0.5) * diagonalHaze * rightField * 0.10;
+  color = mix(color, vec3(1.0), 0.055);
+  color += mix(u_colorB, u_colorD, 0.5) * pointerBend * rightField * 0.09;
   return color;
 }
 
