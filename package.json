@@ -1,9 +1,9 @@
 {
   "name": "huajing-cosmic-capsules",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "private": false,
   "type": "module",
-  "description": "画境观屿：六组实时流动的 WebGL 宇宙胶囊界面。",
+  "description": "画境观屿：九组实时流动的 WebGL 宇宙与柔光胶囊界面。",
   "scripts": {
     "start": "node scripts/serve.mjs",
     "dev": "node scripts/serve.mjs",
