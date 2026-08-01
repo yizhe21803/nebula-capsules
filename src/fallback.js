@@ -43,14 +43,15 @@ export class FallbackRenderer {
   drawPolar(time) {
     const ctx = this.context;
     const { width, height } = this.canvas;
-    const phase = time * 0.72 + this.preset.seed * 0.063;
+    const phase = time * 1.08 + this.preset.seed * 0.063;
     ctx.fillStyle = this.preset.colors[0];
     ctx.fillRect(0, 0, width, height);
     ctx.globalCompositeOperation = 'screen';
 
-    ellipseGlow(ctx, width, height, 0.88 + Math.sin(phase * 0.42) * 0.035, 0.70, 0.48, 0.24, this.preset.colors[1], 0.84);
-    ellipseGlow(ctx, width, height, 0.80 + Math.cos(phase * 0.36) * 0.045, 0.38 + Math.sin(phase * 0.58) * 0.07, 0.56, 0.26, this.preset.colors[2], 0.84);
-    ellipseGlow(ctx, width, height, 0.97 + Math.sin(phase * 0.31) * 0.014, 0.61 + Math.cos(phase * 0.47) * 0.08, 0.22, 0.16, this.preset.colors[3], 0.96);
+    ellipseGlow(ctx, width, height, 0.84 + Math.sin(phase * 0.62) * 0.075, 0.72 + Math.cos(phase * 0.51) * 0.055, 0.62, 0.31, this.preset.colors[1], 0.98);
+    ellipseGlow(ctx, width, height, 0.74 + Math.cos(phase * 0.55) * 0.085, 0.38 + Math.sin(phase * 0.82) * 0.13, 0.68, 0.34, this.preset.colors[2], 0.98);
+    ellipseGlow(ctx, width, height, 0.95 + Math.sin(phase * 0.58) * 0.045, 0.60 + Math.cos(phase * 0.79) * 0.14, 0.30, 0.23, this.preset.colors[3], 1.0);
+    ellipseGlow(ctx, width, height, 0.88 + Math.cos(phase * 0.43) * 0.055, 0.26 + Math.sin(phase * 0.71) * 0.08, 0.25, 0.16, this.preset.colors[3], 0.72);
 
     ctx.globalCompositeOperation = 'source-over';
   }
@@ -58,14 +59,15 @@ export class FallbackRenderer {
   drawDubdot(time) {
     const ctx = this.context;
     const { width, height } = this.canvas;
-    const phase = time * 0.54 + this.preset.seed * 0.051;
+    const phase = time * 0.86 + this.preset.seed * 0.051;
     ctx.fillStyle = this.preset.colors[0];
     ctx.fillRect(0, 0, width, height);
     ctx.globalCompositeOperation = 'screen';
 
-    ellipseGlow(ctx, width, height, 0.86 + Math.sin(phase * 0.35) * 0.025, 0.67 + Math.cos(phase * 0.50) * 0.05, 0.54, 0.30, this.preset.colors[2], 0.50);
-    ellipseGlow(ctx, width, height, 0.91 + Math.cos(phase * 0.31) * 0.020, 0.35 + Math.sin(phase * 0.43) * 0.05, 0.52, 0.29, this.preset.colors[3], 0.58);
-    ellipseGlow(ctx, width, height, 0.73, 0.50, 0.40, 0.42, this.preset.colors[1], 0.26);
+    ellipseGlow(ctx, width, height, 0.82 + Math.sin(phase * 0.62) * 0.070, 0.70 + Math.cos(phase * 0.78) * 0.095, 0.66, 0.36, this.preset.colors[2], 0.72);
+    ellipseGlow(ctx, width, height, 0.88 + Math.cos(phase * 0.54) * 0.060, 0.31 + Math.sin(phase * 0.69) * 0.105, 0.64, 0.35, this.preset.colors[3], 0.82);
+    ellipseGlow(ctx, width, height, 0.69 + Math.sin(phase * 0.47) * 0.055, 0.50 + Math.cos(phase * 0.51) * 0.050, 0.50, 0.46, this.preset.colors[1], 0.42);
+    ellipseGlow(ctx, width, height, 0.91 + Math.sin(phase * 0.82) * 0.035, 0.50 + Math.cos(phase * 0.86) * 0.075, 0.31, 0.18, this.preset.colors[3], 0.42);
 
     ctx.globalCompositeOperation = 'source-over';
   }
@@ -73,14 +75,15 @@ export class FallbackRenderer {
   drawVercel(time) {
     const ctx = this.context;
     const { width, height } = this.canvas;
-    const phase = time * 0.38 + this.preset.seed * 0.044;
+    const phase = time * 0.62 + this.preset.seed * 0.044;
     ctx.fillStyle = this.preset.colors[0];
     ctx.fillRect(0, 0, width, height);
     ctx.globalCompositeOperation = 'screen';
 
-    ellipseGlow(ctx, width, height, 0.88 + Math.sin(phase * 0.35) * 0.025, 0.79, 0.50, 0.34, this.preset.colors[1], 0.38);
-    ellipseGlow(ctx, width, height, 0.90 + Math.cos(phase * 0.28) * 0.025, 0.52 + Math.sin(phase * 0.26) * 0.035, 0.52, 0.34, this.preset.colors[2], 0.40);
-    ellipseGlow(ctx, width, height, 0.86 + Math.sin(phase * 0.23 + 1.3) * 0.035, 0.22, 0.50, 0.34, this.preset.colors[3], 0.36);
+    ellipseGlow(ctx, width, height, 0.84 + Math.sin(phase * 0.58) * 0.075, 0.78 + Math.cos(phase * 0.64) * 0.075, 0.62, 0.42, this.preset.colors[1], 0.58);
+    ellipseGlow(ctx, width, height, 0.87 + Math.cos(phase * 0.49) * 0.070, 0.51 + Math.sin(phase * 0.55) * 0.090, 0.64, 0.42, this.preset.colors[2], 0.62);
+    ellipseGlow(ctx, width, height, 0.81 + Math.sin(phase * 0.43 + 1.3) * 0.090, 0.22 + Math.cos(phase * 0.59) * 0.075, 0.62, 0.42, this.preset.colors[3], 0.56);
+    ellipseGlow(ctx, width, height, 0.76 + Math.cos(phase * 0.52) * 0.050, 0.48 + Math.sin(phase * 0.63) * 0.075, 0.43, 0.25, this.preset.colors[2], 0.24);
 
     ctx.globalCompositeOperation = 'source-over';
   }
