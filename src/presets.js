@@ -60,6 +60,7 @@ export const PRESETS = [
     subtitle: 'YOU MADE A SALE',
     group: 'warm',
     mode: 'aurora',
+    motionProfile: 'polar',
     theme: 'dark',
     seed: 67.4,
     speed: 0.23,
@@ -72,6 +73,7 @@ export const PRESETS = [
     subtitle: '$2000 COMMISSION',
     group: 'cold',
     mode: 'aurora',
+    motionProfile: 'dubdot',
     theme: 'light',
     seed: 78.6,
     speed: 0.2,
@@ -84,6 +86,7 @@ export const PRESETS = [
     subtitle: 'DEPLOYMENT IN 24H',
     group: 'warm',
     mode: 'aurora',
+    motionProfile: 'vercel',
     theme: 'light',
     seed: 89.9,
     speed: 0.18,
@@ -107,6 +110,7 @@ export function validatePreset(preset) {
     typeof preset.id === 'string' &&
     typeof preset.name === 'string' &&
     ['nebula', 'aurora'].includes(preset.mode || 'nebula') &&
+    (!preset.motionProfile || ['polar', 'dubdot', 'vercel'].includes(preset.motionProfile)) &&
     Number.isFinite(preset.seed) &&
     Number.isFinite(preset.speed) &&
     Array.isArray(preset.colors) &&
