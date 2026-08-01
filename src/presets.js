@@ -66,6 +66,7 @@ export const PRESETS = [
     subtitle: 'YOU MADE A SALE',
     group: 'cold',
     mode: 'aurora',
+    theme: 'dark',
     seed: 67.4,
     speed: 0.23,
     colors: ['#202126', '#02D8C4', '#168FDE', '#5B20E9']
@@ -77,6 +78,7 @@ export const PRESETS = [
     subtitle: '$2000 COMMISSION',
     group: 'warm',
     mode: 'aurora',
+    theme: 'light',
     seed: 78.6,
     speed: 0.2,
     colors: ['#FFFFFF', '#FFE7C4', '#FFB06C', '#FF7397']
@@ -88,6 +90,7 @@ export const PRESETS = [
     subtitle: 'DEPLOYMENT IN 24H',
     group: 'cold',
     mode: 'aurora',
+    theme: 'light',
     seed: 89.9,
     speed: 0.18,
     colors: ['#FFFFFF', '#B9F6E7', '#73CAFF', '#CDA8FF']
