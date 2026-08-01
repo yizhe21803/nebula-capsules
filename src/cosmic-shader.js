@@ -18,6 +18,7 @@ uniform vec2 u_resolution;
 uniform float u_time;
 uniform float u_seed;
 uniform float u_motion;
+uniform float u_mode;
 uniform vec2 u_pointer;
 uniform vec3 u_colorA;
 uniform vec3 u_colorB;
@@ -62,22 +63,14 @@ vec3 palette(float t) {
   return mix(restrained, highlight, smoothstep(0.78, 0.97, t));
 }
 
-void main() {
-  vec2 uv = v_uv;
-  vec2 p = uv - 0.5;
-  p.x *= u_resolution.x / max(u_resolution.y, 1.0);
-
-  vec2 pointer = u_pointer - 0.5;
-  pointer.x *= u_resolution.x / max(u_resolution.y, 1.0);
+vec3 renderNebula(vec2 uv, vec2 p, vec2 pointer, float distanceToPointer, float t) {
   vec2 delta = p - pointer;
-  float distanceToPointer = length(delta);
   float influence = exp(-distanceToPointer * 4.6) * u_motion;
   float angle = influence * 1.7;
   mat2 swirl = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
   p = pointer + swirl * delta;
   p += normalize(delta + 0.0001) * influence * 0.08;
 
-  float t = u_time;
   vec2 drift = vec2(t * 0.22, -t * 0.13);
   vec2 q = vec2(
     fbm(p * 1.35 + drift + u_seed),
@@ -106,10 +99,57 @@ void main() {
 
   float pointerGlow = exp(-distanceToPointer * 7.0) * u_motion;
   color += u_colorD * pointerGlow * 0.28;
+  return color;
+}
+
+vec3 renderAurora(vec2 uv, vec2 p, vec2 pointer, float distanceToPointer, float t) {
+  float rightField = smoothstep(0.05, 0.94, uv.x);
+  float phase = t * 0.62 + u_seed * 0.071;
+  float distortion = fbm(vec2(uv.x * 1.15 + phase * 0.10, uv.y * 1.8 - phase * 0.08) + u_seed) - 0.5;
+
+  float centerA = 0.70 - uv.x * 0.28 + sin(phase + uv.x * 2.6) * 0.105 + distortion * 0.15;
+  float centerB = 0.26 + uv.x * 0.31 + cos(phase * 0.83 + uv.x * 2.15) * 0.09 - distortion * 0.12;
+  float centerC = 0.52 + sin(phase * 0.56 + uv.x * 4.1) * 0.16;
+
+  float ribbonA = exp(-pow(uv.y - centerA, 2.0) / 0.042);
+  float ribbonB = exp(-pow(uv.y - centerB, 2.0) / 0.050);
+  float ribbonC = exp(-pow(uv.y - centerC, 2.0) / 0.115) * 0.48;
+
+  float pointerBend = exp(-distanceToPointer * 6.0) * u_motion;
+  ribbonA += pointerBend * 0.28;
+  ribbonB += pointerBend * 0.18;
+
+  vec3 color = u_colorA;
+  color = mix(color, u_colorB, clamp(ribbonB * rightField * 0.92, 0.0, 1.0));
+  color = mix(color, u_colorC, clamp(ribbonC * rightField * 0.88, 0.0, 1.0));
+  color = mix(color, u_colorD, clamp(ribbonA * rightField * 0.86, 0.0, 1.0));
+
+  float mist = smoothstep(0.12, 0.92, fbm(vec2(uv.x * 0.82 - phase * 0.08, uv.y * 1.35 + phase * 0.05) + 4.0));
+  color = mix(color, mix(u_colorB, u_colorC, 0.5), mist * rightField * 0.12);
+
+  float highlight = exp(-pow(uv.y - (centerA - 0.11), 2.0) / 0.018) * rightField;
+  color += mix(u_colorB, vec3(1.0), 0.55) * highlight * 0.12;
+  color += u_colorD * pointerBend * 0.16;
+  return color;
+}
+
+void main() {
+  vec2 uv = v_uv;
+  vec2 p = uv - 0.5;
+  p.x *= u_resolution.x / max(u_resolution.y, 1.0);
+
+  vec2 pointer = u_pointer - 0.5;
+  pointer.x *= u_resolution.x / max(u_resolution.y, 1.0);
+  float distanceToPointer = length(p - pointer);
+  float t = u_time;
+
+  vec3 color = u_mode > 0.5
+    ? renderAurora(uv, p, pointer, distanceToPointer, t)
+    : renderNebula(uv, p, pointer, distanceToPointer, t);
 
   float vignette = smoothstep(0.94, 0.18, length((uv - 0.5) * vec2(1.0, 1.35)));
-  color *= 0.70 + vignette * 0.42;
-  color = pow(color, vec3(0.88));
+  color *= u_mode > 0.5 ? (0.93 + vignette * 0.08) : (0.70 + vignette * 0.42);
+  color = pow(max(color, vec3(0.0)), vec3(u_mode > 0.5 ? 0.96 : 0.88));
 
   outColor = vec4(color, 1.0);
 }`;
@@ -181,6 +221,7 @@ export class CosmicRenderer {
       time: uniform('u_time'),
       seed: uniform('u_seed'),
       motion: uniform('u_motion'),
+      mode: uniform('u_mode'),
       pointer: uniform('u_pointer'),
       colorA: uniform('u_colorA'),
       colorB: uniform('u_colorB'),
@@ -250,6 +291,7 @@ export class CosmicRenderer {
     gl.uniform1f(this.locations.time, this.timeOffset + (paused ? 0 : elapsedSeconds * this.preset.speed));
     gl.uniform1f(this.locations.seed, this.preset.seed);
     gl.uniform1f(this.locations.motion, this.motion);
+    gl.uniform1f(this.locations.mode, this.preset.mode === 'aurora' ? 1 : 0);
     gl.uniform2f(this.locations.pointer, this.pointer[0], this.pointer[1]);
     gl.uniform3fv(this.locations.colorA, colors[0]);
     gl.uniform3fv(this.locations.colorB, colors[1]);
