@@ -76,6 +76,7 @@ assert.deepEqual(PRESETS.map((item) => item.name), [
   'VERCEL'
 ]);
 assert.deepEqual(PRESETS.slice(-3).map((item) => item.mode), ['aurora', 'aurora', 'aurora']);
+assert.deepEqual(PRESETS.slice(-3).map((item) => item.motionProfile), ['polar', 'dubdot', 'vercel']);
 assert.deepEqual(PRESETS.slice(-3).map((item) => item.code), ['NC-07', 'NC-08', 'NC-09']);
 assert.deepEqual(PRESETS.slice(-3).map((item) => item.colors), [
   ['#202126', '#FF7A1A', '#FF22D3', '#FFF7A3'],
@@ -96,8 +97,16 @@ assert.match(mainSource, /SOFT AURORA CAPSULE/);
 assert.match(mainSource, /total-count/);
 
 const shaderSource = await readFile(new URL('./src/cosmic-shader.js', import.meta.url), 'utf8');
-assert.match(shaderSource, /renderAurora/);
-assert.match(shaderSource, /u_mode/);
+assert.match(shaderSource, /renderPolar/);
+assert.match(shaderSource, /renderDubdot/);
+assert.match(shaderSource, /renderVercel/);
+assert.match(shaderSource, /u_profile/);
+assert.match(shaderSource, /AURORA_PROFILE/);
+
+const fallbackSource = await readFile(new URL('./src/fallback.js', import.meta.url), 'utf8');
+assert.match(fallbackSource, /drawPolar/);
+assert.match(fallbackSource, /drawDubdot/);
+assert.match(fallbackSource, /drawVercel/);
 
 const readmeZh = await readFile(new URL('./README.md', import.meta.url), 'utf8');
 const readmeEn = await readFile(new URL('./README.en.md', import.meta.url), 'utf8');
