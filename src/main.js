@@ -53,6 +53,7 @@ function createCard(preset) {
   card.className = 'capsule-card';
   card.dataset.group = preset.group;
   card.dataset.mode = preset.mode || 'nebula';
+  card.dataset.theme = preset.theme || 'light';
   card.setAttribute('aria-label', `打开 ${preset.name} 沉浸预览`);
   const subtitle = preset.subtitle || '画境观屿';
   const brandLine = preset.subtitle ? 'SOFT AURORA CAPSULE' : 'HUA JING GUAN YU';
