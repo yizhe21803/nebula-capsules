@@ -63,7 +63,7 @@ export const PRESETS = [
     motionProfile: 'polar',
     theme: 'dark',
     seed: 67.4,
-    speed: 0.23,
+    speed: 0.34,
     colors: ['#202126', '#FF7A1A', '#FF22D3', '#FFF7A3']
   },
   {
@@ -76,7 +76,7 @@ export const PRESETS = [
     motionProfile: 'dubdot',
     theme: 'light',
     seed: 78.6,
-    speed: 0.2,
+    speed: 0.30,
     colors: ['#FFFFFF', '#DDEEFF', '#A7DBFF', '#27B8F3']
   },
   {
@@ -89,7 +89,7 @@ export const PRESETS = [
     motionProfile: 'vercel',
     theme: 'light',
     seed: 89.9,
-    speed: 0.18,
+    speed: 0.25,
     colors: ['#FFFFFF', '#BCEFEA', '#FFD76A', '#FF8BB6']
   }
 ];
