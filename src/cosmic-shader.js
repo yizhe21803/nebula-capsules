@@ -1,5 +1,11 @@
 import { hexToRgb01 } from './presets.js';
 
+const AURORA_PROFILE = {
+  polar: 1,
+  dubdot: 2,
+  vercel: 3
+};
+
 const VERTEX_SHADER = `#version 300 es
 in vec2 a_position;
 out vec2 v_uv;
@@ -19,6 +25,7 @@ uniform float u_time;
 uniform float u_seed;
 uniform float u_motion;
 uniform float u_mode;
+uniform float u_profile;
 uniform vec2 u_pointer;
 uniform vec3 u_colorA;
 uniform vec3 u_colorB;
@@ -52,6 +59,10 @@ float fbm(vec2 p) {
     amplitude *= 0.5;
   }
   return value;
+}
+
+float gaussian(float value, float center, float width) {
+  return exp(-pow(value - center, 2.0) / max(width, 0.0001));
 }
 
 vec3 palette(float t) {
@@ -102,35 +113,80 @@ vec3 renderNebula(vec2 uv, vec2 p, vec2 pointer, float distanceToPointer, float 
   return color;
 }
 
-vec3 renderAurora(vec2 uv, vec2 p, vec2 pointer, float distanceToPointer, float t) {
-  float rightField = smoothstep(0.05, 0.94, uv.x);
-  float phase = t * 0.62 + u_seed * 0.071;
-  float distortion = fbm(vec2(uv.x * 1.15 + phase * 0.10, uv.y * 1.8 - phase * 0.08) + u_seed) - 0.5;
+vec3 renderPolar(vec2 uv, float distanceToPointer, float t) {
+  float phase = t * 0.72 + u_seed * 0.063;
+  float rightField = smoothstep(0.18, 0.98, uv.x);
+  float grain = fbm(vec2(uv.x * 1.55 - phase * 0.08, uv.y * 2.15 + phase * 0.06) + u_seed) - 0.5;
 
-  float centerA = 0.70 - uv.x * 0.28 + sin(phase + uv.x * 2.6) * 0.105 + distortion * 0.15;
-  float centerB = 0.26 + uv.x * 0.31 + cos(phase * 0.83 + uv.x * 2.15) * 0.09 - distortion * 0.12;
-  float centerC = 0.52 + sin(phase * 0.56 + uv.x * 4.1) * 0.16;
+  float orangeCenter = 0.74 - uv.x * 0.18 + sin(phase + uv.x * 3.2) * 0.08 + grain * 0.11;
+  float magentaCenter = 0.38 + uv.x * 0.11 + sin(phase * 0.77 + uv.x * 4.0 + 1.1) * 0.10 - grain * 0.10;
+  float lowerCenter = 0.16 + sin(phase * 0.56 + uv.x * 3.1) * 0.06;
 
-  float ribbonA = exp(-pow(uv.y - centerA, 2.0) / 0.042);
-  float ribbonB = exp(-pow(uv.y - centerB, 2.0) / 0.050);
-  float ribbonC = exp(-pow(uv.y - centerC, 2.0) / 0.115) * 0.48;
+  float orangeBand = gaussian(uv.y, orangeCenter, 0.055);
+  float magentaBand = gaussian(uv.y, magentaCenter, 0.080);
+  float lowerBand = gaussian(uv.y, lowerCenter, 0.050);
 
-  float pointerBend = exp(-distanceToPointer * 6.0) * u_motion;
-  ribbonA += pointerBend * 0.28;
-  ribbonB += pointerBend * 0.18;
+  float whiteCore = exp(-length((uv - vec2(0.965 + sin(phase * 0.45) * 0.018, 0.62 + cos(phase * 0.62) * 0.08)) * vec2(2.5, 1.15)) * 8.0);
+  float pulse = 0.88 + sin(phase * 1.35) * 0.12;
+  float pointerBend = exp(-distanceToPointer * 7.0) * u_motion;
 
   vec3 color = u_colorA;
-  color = mix(color, u_colorB, clamp(ribbonB * rightField * 0.92, 0.0, 1.0));
-  color = mix(color, u_colorC, clamp(ribbonC * rightField * 0.88, 0.0, 1.0));
-  color = mix(color, u_colorD, clamp(ribbonA * rightField * 0.86, 0.0, 1.0));
-
-  float mist = smoothstep(0.12, 0.92, fbm(vec2(uv.x * 0.82 - phase * 0.08, uv.y * 1.35 + phase * 0.05) + 4.0));
-  color = mix(color, mix(u_colorB, u_colorC, 0.5), mist * rightField * 0.12);
-
-  float highlight = exp(-pow(uv.y - (centerA - 0.11), 2.0) / 0.018) * rightField;
-  color += mix(u_colorB, vec3(1.0), 0.55) * highlight * 0.12;
-  color += u_colorD * pointerBend * 0.16;
+  color = mix(color, u_colorB, clamp(orangeBand * rightField * 0.92, 0.0, 1.0));
+  color = mix(color, u_colorC, clamp((magentaBand * 0.92 + lowerBand * 0.58) * rightField, 0.0, 1.0));
+  color += u_colorD * whiteCore * pulse * 0.95;
+  color += u_colorC * pointerBend * rightField * 0.14;
+  color += mix(u_colorB, u_colorC, 0.55) * smoothstep(0.42, 0.96, grain + 0.5) * rightField * 0.10;
   return color;
+}
+
+vec3 renderDubdot(vec2 uv, float distanceToPointer, float t) {
+  float phase = t * 0.54 + u_seed * 0.051;
+  float rightField = smoothstep(0.30, 0.98, uv.x);
+  float drift = fbm(vec2(uv.x * 1.05 - phase * 0.055, uv.y * 1.75 + phase * 0.04) + u_seed) - 0.5;
+
+  float upperCenter = 0.69 - uv.x * 0.14 + sin(phase + uv.x * 2.8) * 0.065 + drift * 0.10;
+  float lowerCenter = 0.31 + uv.x * 0.08 + cos(phase * 0.78 + uv.x * 2.5) * 0.070 - drift * 0.08;
+  float upperBand = gaussian(uv.y, upperCenter, 0.095);
+  float lowerBand = gaussian(uv.y, lowerCenter, 0.105);
+  float softBody = exp(-length((uv - vec2(0.91 + sin(phase * 0.38) * 0.025, 0.51)) * vec2(1.65, 0.82)) * 3.5);
+  float pointerBend = exp(-distanceToPointer * 7.5) * u_motion;
+
+  vec3 color = u_colorA;
+  color = mix(color, u_colorB, clamp(softBody * rightField * 0.58, 0.0, 1.0));
+  color = mix(color, u_colorC, clamp(upperBand * rightField * 0.50, 0.0, 1.0));
+  color = mix(color, u_colorD, clamp((lowerBand * 0.58 + softBody * 0.36) * rightField, 0.0, 1.0));
+  color = mix(color, vec3(1.0), smoothstep(0.0, 0.42, 1.0 - rightField) * 0.34);
+  color += u_colorD * pointerBend * rightField * 0.08;
+  return color;
+}
+
+vec3 renderVercel(vec2 uv, float distanceToPointer, float t) {
+  float phase = t * 0.38 + u_seed * 0.044;
+  float rightField = smoothstep(0.27, 0.99, uv.x);
+  float haze = fbm(vec2(uv.x * 0.72 - phase * 0.035, uv.y * 1.12 + phase * 0.026) + u_seed) - 0.5;
+
+  vec2 mintPos = vec2(0.88 + sin(phase * 0.55) * 0.035, 0.78 + cos(phase * 0.47) * 0.035);
+  vec2 goldPos = vec2(0.90 + cos(phase * 0.41) * 0.030, 0.52 + sin(phase * 0.36) * 0.045);
+  vec2 pinkPos = vec2(0.86 + sin(phase * 0.33 + 1.7) * 0.045, 0.23 + cos(phase * 0.40) * 0.035);
+
+  float mintCloud = exp(-length((uv - mintPos) * vec2(1.35, 0.78)) * 3.6);
+  float goldCloud = exp(-length((uv - goldPos) * vec2(1.28, 0.72)) * 3.4);
+  float pinkCloud = exp(-length((uv - pinkPos) * vec2(1.20, 0.76)) * 3.3);
+  float pointerBend = exp(-distanceToPointer * 8.0) * u_motion;
+
+  vec3 color = u_colorA;
+  color = mix(color, u_colorB, clamp((mintCloud + haze * 0.08) * rightField * 0.48, 0.0, 1.0));
+  color = mix(color, u_colorC, clamp(goldCloud * rightField * 0.50, 0.0, 1.0));
+  color = mix(color, u_colorD, clamp(pinkCloud * rightField * 0.44, 0.0, 1.0));
+  color = mix(color, vec3(1.0), 0.10);
+  color += mix(u_colorB, u_colorD, 0.5) * pointerBend * rightField * 0.045;
+  return color;
+}
+
+vec3 renderAuroraProfile(vec2 uv, float distanceToPointer, float t) {
+  if (u_profile < 1.5) return renderPolar(uv, distanceToPointer, t);
+  if (u_profile < 2.5) return renderDubdot(uv, distanceToPointer, t);
+  return renderVercel(uv, distanceToPointer, t);
 }
 
 void main() {
@@ -144,12 +200,12 @@ void main() {
   float t = u_time;
 
   vec3 color = u_mode > 0.5
-    ? renderAurora(uv, p, pointer, distanceToPointer, t)
+    ? renderAuroraProfile(uv, distanceToPointer, t)
     : renderNebula(uv, p, pointer, distanceToPointer, t);
 
   float vignette = smoothstep(0.94, 0.18, length((uv - 0.5) * vec2(1.0, 1.35)));
-  color *= u_mode > 0.5 ? (0.93 + vignette * 0.08) : (0.70 + vignette * 0.42);
-  color = pow(max(color, vec3(0.0)), vec3(u_mode > 0.5 ? 0.96 : 0.88));
+  color *= u_mode > 0.5 ? (0.96 + vignette * 0.05) : (0.70 + vignette * 0.42);
+  color = pow(max(color, vec3(0.0)), vec3(u_mode > 0.5 ? 0.98 : 0.88));
 
   outColor = vec4(color, 1.0);
 }`;
@@ -222,6 +278,7 @@ export class CosmicRenderer {
       seed: uniform('u_seed'),
       motion: uniform('u_motion'),
       mode: uniform('u_mode'),
+      profile: uniform('u_profile'),
       pointer: uniform('u_pointer'),
       colorA: uniform('u_colorA'),
       colorB: uniform('u_colorB'),
@@ -292,6 +349,7 @@ export class CosmicRenderer {
     gl.uniform1f(this.locations.seed, this.preset.seed);
     gl.uniform1f(this.locations.motion, this.motion);
     gl.uniform1f(this.locations.mode, this.preset.mode === 'aurora' ? 1 : 0);
+    gl.uniform1f(this.locations.profile, AURORA_PROFILE[this.preset.motionProfile] || 0);
     gl.uniform2f(this.locations.pointer, this.pointer[0], this.pointer[1]);
     gl.uniform3fv(this.locations.colorA, colors[0]);
     gl.uniform3fv(this.locations.colorB, colors[1]);
