@@ -173,27 +173,47 @@ vec3 renderDubdot(vec2 uv, float distanceToPointer, float t) {
 }
 
 vec3 renderVercel(vec2 uv, float distanceToPointer, float t) {
-  float phase = t * 0.62 + u_seed * 0.044;
-  float rightField = smoothstep(0.14, 0.98, uv.x);
-  float haze = fbm(vec2(uv.x * 0.90 - phase * 0.075, uv.y * 1.35 + phase * 0.052) + u_seed) - 0.5;
+  float phase = t * 1.18 + u_seed * 0.044;
+  float rightField = smoothstep(0.02, 0.96, uv.x);
+  float haze = fbm(vec2(uv.x * 1.10 - phase * 0.14, uv.y * 1.55 + phase * 0.10) + u_seed) - 0.5;
 
-  vec2 mintPos = vec2(0.84 + sin(phase * 0.73) * 0.075, 0.78 + cos(phase * 0.62) * 0.075);
-  vec2 goldPos = vec2(0.88 + cos(phase * 0.58) * 0.070, 0.51 + sin(phase * 0.52) * 0.095);
-  vec2 pinkPos = vec2(0.82 + sin(phase * 0.49 + 1.7) * 0.090, 0.22 + cos(phase * 0.57) * 0.075);
+  vec2 mintPos = vec2(0.78 + sin(phase * 0.82) * 0.16, 0.78 + cos(phase * 0.67) * 0.14);
+  vec2 goldPos = vec2(0.88 + cos(phase * 0.71) * 0.14, 0.50 + sin(phase * 0.59) * 0.16);
+  vec2 pinkPos = vec2(0.79 + sin(phase * 0.63 + 1.7) * 0.18, 0.22 + cos(phase * 0.74) * 0.13);
 
-  float mintCloud = exp(-length((uv - mintPos) * vec2(1.14, 0.66)) * 2.85);
-  float goldCloud = exp(-length((uv - goldPos) * vec2(1.08, 0.64)) * 2.70);
-  float pinkCloud = exp(-length((uv - pinkPos) * vec2(1.02, 0.66)) * 2.62);
-  float diagonalHaze = gaussian(uv.y, 0.62 - uv.x * 0.24 + sin(phase + uv.x * 3.1) * 0.09, 0.13);
-  float pointerBend = exp(-distanceToPointer * 7.2) * u_motion;
+  vec2 mintEchoPos = vec2(0.92 + cos(phase * 0.55) * 0.10, 0.66 + sin(phase * 0.92) * 0.11);
+  vec2 goldEchoPos = vec2(0.73 + sin(phase * 0.88 + 1.2) * 0.12, 0.55 + cos(phase * 0.66) * 0.12);
+  vec2 pinkEchoPos = vec2(0.93 + cos(phase * 0.79 + 0.8) * 0.11, 0.34 + sin(phase * 0.58) * 0.10);
+
+  float mintPulse = 0.72 + sin(phase * 1.18) * 0.28;
+  float goldPulse = 0.74 + sin(phase * 1.37 + 1.6) * 0.26;
+  float pinkPulse = 0.70 + sin(phase * 1.06 + 3.1) * 0.30;
+
+  float mintCloud = exp(-length((uv - mintPos) * vec2(1.30, 0.72)) * 3.05) * mintPulse;
+  mintCloud += exp(-length((uv - mintEchoPos) * vec2(1.55, 0.88)) * 4.10) * (1.0 - mintPulse) * 0.92;
+
+  float goldCloud = exp(-length((uv - goldPos) * vec2(1.22, 0.70)) * 2.92) * goldPulse;
+  goldCloud += exp(-length((uv - goldEchoPos) * vec2(1.48, 0.84)) * 3.90) * (1.0 - goldPulse) * 0.88;
+
+  float pinkCloud = exp(-length((uv - pinkPos) * vec2(1.18, 0.72)) * 2.84) * pinkPulse;
+  pinkCloud += exp(-length((uv - pinkEchoPos) * vec2(1.42, 0.82)) * 3.75) * (1.0 - pinkPulse) * 0.94;
+
+  float mintRibbon = gaussian(uv.y, 0.76 - uv.x * 0.20 + sin(phase * 0.91 + uv.x * 4.4) * 0.13, 0.095);
+  float goldRibbon = gaussian(uv.y, 0.52 - uv.x * 0.08 + sin(phase * 1.07 + uv.x * 3.8 + 1.4) * 0.12, 0.105);
+  float pinkRibbon = gaussian(uv.y, 0.26 + uv.x * 0.13 + sin(phase * 0.79 + uv.x * 4.9 + 2.8) * 0.12, 0.090);
+
+  float movingGap = gaussian(uv.y, 0.48 + sin(phase * 0.72 + uv.x * 5.2) * 0.16, 0.050) * smoothstep(0.34, 0.98, uv.x);
+  float pointerBend = exp(-distanceToPointer * 6.8) * u_motion;
 
   vec3 color = u_colorA;
-  color = mix(color, u_colorB, clamp((mintCloud + haze * 0.15) * rightField * 0.68, 0.0, 1.0));
-  color = mix(color, u_colorC, clamp((goldCloud + diagonalHaze * 0.22) * rightField * 0.70, 0.0, 1.0));
-  color = mix(color, u_colorD, clamp((pinkCloud + diagonalHaze * 0.18) * rightField * 0.64, 0.0, 1.0));
-  color += mix(u_colorB, u_colorC, 0.5) * diagonalHaze * rightField * 0.10;
-  color = mix(color, vec3(1.0), 0.055);
-  color += mix(u_colorB, u_colorD, 0.5) * pointerBend * rightField * 0.09;
+  color = mix(color, u_colorB, clamp((mintCloud * 0.96 + mintRibbon * 0.28 + haze * 0.20) * rightField, 0.0, 1.0));
+  color = mix(color, u_colorC, clamp((goldCloud * 0.94 + goldRibbon * 0.34) * rightField, 0.0, 1.0));
+  color = mix(color, u_colorD, clamp((pinkCloud * 0.90 + pinkRibbon * 0.32) * rightField, 0.0, 1.0));
+
+  color += mix(u_colorB, u_colorC, 0.46) * mintRibbon * rightField * 0.13;
+  color += mix(u_colorC, u_colorD, 0.48) * pinkRibbon * rightField * 0.12;
+  color = mix(color, vec3(1.0), movingGap * 0.16);
+  color += mix(u_colorB, u_colorD, 0.5) * pointerBend * rightField * 0.14;
   return color;
 }
 
