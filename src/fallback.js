@@ -75,15 +75,25 @@ export class FallbackRenderer {
   drawVercel(time) {
     const ctx = this.context;
     const { width, height } = this.canvas;
-    const phase = time * 0.62 + this.preset.seed * 0.044;
+    const phase = time * 1.18 + this.preset.seed * 0.044;
+    const mintPulse = 0.72 + Math.sin(phase * 1.18) * 0.28;
+    const goldPulse = 0.74 + Math.sin(phase * 1.37 + 1.6) * 0.26;
+    const pinkPulse = 0.70 + Math.sin(phase * 1.06 + 3.1) * 0.30;
+
     ctx.fillStyle = this.preset.colors[0];
     ctx.fillRect(0, 0, width, height);
     ctx.globalCompositeOperation = 'screen';
 
-    ellipseGlow(ctx, width, height, 0.84 + Math.sin(phase * 0.58) * 0.075, 0.78 + Math.cos(phase * 0.64) * 0.075, 0.62, 0.42, this.preset.colors[1], 0.58);
-    ellipseGlow(ctx, width, height, 0.87 + Math.cos(phase * 0.49) * 0.070, 0.51 + Math.sin(phase * 0.55) * 0.090, 0.64, 0.42, this.preset.colors[2], 0.62);
-    ellipseGlow(ctx, width, height, 0.81 + Math.sin(phase * 0.43 + 1.3) * 0.090, 0.22 + Math.cos(phase * 0.59) * 0.075, 0.62, 0.42, this.preset.colors[3], 0.56);
-    ellipseGlow(ctx, width, height, 0.76 + Math.cos(phase * 0.52) * 0.050, 0.48 + Math.sin(phase * 0.63) * 0.075, 0.43, 0.25, this.preset.colors[2], 0.24);
+    ellipseGlow(ctx, width, height, 0.78 + Math.sin(phase * 0.82) * 0.16, 0.78 + Math.cos(phase * 0.67) * 0.14, 0.60, 0.39, this.preset.colors[1], 0.82 * mintPulse);
+    ellipseGlow(ctx, width, height, 0.92 + Math.cos(phase * 0.55) * 0.10, 0.66 + Math.sin(phase * 0.92) * 0.11, 0.40, 0.25, this.preset.colors[1], 0.58 * (1 - mintPulse + 0.28));
+
+    ellipseGlow(ctx, width, height, 0.88 + Math.cos(phase * 0.71) * 0.14, 0.50 + Math.sin(phase * 0.59) * 0.16, 0.62, 0.40, this.preset.colors[2], 0.86 * goldPulse);
+    ellipseGlow(ctx, width, height, 0.73 + Math.sin(phase * 0.88 + 1.2) * 0.12, 0.55 + Math.cos(phase * 0.66) * 0.12, 0.42, 0.26, this.preset.colors[2], 0.58 * (1 - goldPulse + 0.26));
+
+    ellipseGlow(ctx, width, height, 0.79 + Math.sin(phase * 0.63 + 1.7) * 0.18, 0.22 + Math.cos(phase * 0.74) * 0.13, 0.60, 0.39, this.preset.colors[3], 0.82 * pinkPulse);
+    ellipseGlow(ctx, width, height, 0.93 + Math.cos(phase * 0.79 + 0.8) * 0.11, 0.34 + Math.sin(phase * 0.58) * 0.10, 0.40, 0.24, this.preset.colors[3], 0.60 * (1 - pinkPulse + 0.30));
+
+    ellipseGlow(ctx, width, height, 0.84 + Math.sin(phase * 1.07) * 0.10, 0.50 + Math.cos(phase * 0.72) * 0.15, 0.34, 0.18, this.preset.colors[2], 0.30);
 
     ctx.globalCompositeOperation = 'source-over';
   }
