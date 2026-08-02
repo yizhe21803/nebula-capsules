@@ -5,13 +5,13 @@
 Nine realtime generative capsules: **Original, Ocean, Klein, Ultraviolet, Chrome, Plus, Polar, Dubdot, and Vercel**.
 
 - `NC-01 ~ NC-06`: cosmic nebula fluid mode
-- `NC-07 POLAR`: dark capsule with teal, blue, and violet light bands
-- `NC-08 DUBDOT`: white capsule with cream, orange, and coral light bands
-- `NC-09 VERCEL`: white capsule with mint, blue, and lavender light bands
+- `NC-07 POLAR`: dark capsule with orange, magenta, and warm-white light ribbons; no dark outer outline
+- `NC-08 DUBDOT`: white capsule with pale blue, sky blue, and cyan light ribbons
+- `NC-09 VERCEL`: white capsule with mint, soft yellow, and pale pink light ribbons
 
-The three new styles are appended in the exact reference-image order and use a dedicated `aurora` animation mode. The page continues to support WebGL2, Canvas 2D fallback, autoplay, pointer/touch gravity, pause controls, randomization, cool/warm filtering, and an immersive viewer.
+The three new styles are appended in the exact reference-image order and use dedicated `aurora` motion profiles. All three are rendered inside the WebGL2 fluid pipeline, with Canvas 2D fallback when WebGL2 is unavailable. The page continues to support autoplay, pointer/touch gravity, pause controls, randomization, cool/warm filtering, and an immersive viewer.
 
-![Huajing Guanyu Cosmic Capsules preview](assets/preview-v1.0.3.svg)
+![Huajing Guanyu nine-capsule preview](assets/preview-v2.0.1.svg)
 
 ## One-click launchers (recommended)
 
@@ -45,7 +45,7 @@ If the port is occupied, the server automatically tries later ports. The project
 - **Pause / Continue**: freezes or resumes all visible animations.
 - **All / Cool / Warm**: filters capsules by palette group.
 - **Click a capsule**: opens the corresponding full-screen viewer.
-- **Move or touch**: temporarily changes the gravity direction of the nebula or light bands.
+- **Move or touch**: temporarily changes the gravity direction of the nebula or light ribbons.
 
 ## Rendering modes
 
@@ -55,7 +55,7 @@ The original six presets use layered noise, stars, clouds, and swirls to form co
 
 ### Aurora
 
-The three new presets use low-frequency noise and multiple soft light ribbons to create smooth moving gradients:
+The three new presets use low-frequency noise and multiple light ribbons to create smoothly moving gradients:
 
 ```text
 NC-07 POLAR
@@ -63,7 +63,7 @@ NC-08 DUBDOT
 NC-09 VERCEL
 ```
 
-`POLAR` has a dedicated dark text area. `DUBDOT` and `VERCEL` keep a white capsule base. When WebGL2 is unavailable, the project automatically switches to a Canvas 2D aurora fallback.
+`POLAR` uses a dark text area without an outer outline. `DUBDOT` and `VERCEL` keep white capsule bases. All three use the same WebGL / Canvas internal ribbon-rendering standard, with no separate CSS sweep or cloud animation layers.
 
 ## Development and verification
 
