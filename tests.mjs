@@ -121,10 +121,12 @@ assert.match(fallbackSource, /pinkPulse/);
 
 const auroraStyles = await readFile(new URL('./aurora.css', import.meta.url), 'utf8');
 assert.match(auroraStyles, /data-profile="vercel"/);
-assert.match(auroraStyles, /vercel-color-takeover/);
-assert.match(auroraStyles, /vercel-visible-sweep/);
-assert.match(auroraStyles, /background-size:\s*96% 112%/);
-assert.match(auroraStyles, /animation-duration:\s*3\.2s/);
+assert.match(auroraStyles, /vercel-layer-motion/);
+assert.doesNotMatch(auroraStyles, /vercel-visible-sweep/);
+assert.doesNotMatch(auroraStyles, /viewer\[data-profile="vercel"\]\s+\.viewer-stage::after/);
+assert.match(auroraStyles, /background-size:\s*122% 142%/);
+assert.match(auroraStyles, /animation:\s*vercel-layer-motion 2\.8s/);
+assert.match(auroraStyles, /animation-duration:\s*2\.5s/);
 
 const readmeZh = await readFile(new URL('./README.md', import.meta.url), 'utf8');
 const readmeEn = await readFile(new URL('./README.en.md', import.meta.url), 'utf8');
