@@ -78,7 +78,6 @@ assert.deepEqual(PRESETS.map((item) => item.name), [
 assert.deepEqual(PRESETS.slice(-3).map((item) => item.mode), ['aurora', 'aurora', 'aurora']);
 assert.deepEqual(PRESETS.slice(-3).map((item) => item.motionProfile), ['polar', 'dubdot', 'vercel']);
 assert.deepEqual(PRESETS.slice(-3).map((item) => item.code), ['NC-07', 'NC-08', 'NC-09']);
-
 assert.equal(PRESETS.find((item) => item.code === 'NC-09')?.speed, 0.36);
 assert.deepEqual(PRESETS.slice(-3).map((item) => item.colors), [
   ['#202126', '#FF7A1A', '#FF22D3', '#FFF7A3'],
@@ -91,12 +90,15 @@ assert.deepEqual(hexToRgb01('#ffffff'), [1, 1, 1]);
 const styles = await readFile(new URL('./styles.css', import.meta.url), 'utf8');
 assert.match(styles, /\.capsule-stage\s*\{[\s\S]*?height:\s*clamp\(126px,\s*11vw,\s*148px\);[\s\S]*?border-radius:\s*999px;/);
 assert.match(styles, /\.text-action,\s*\n\.primary-action\s*\{[\s\S]*?height:\s*34px;[\s\S]*?border-radius:\s*17px;/);
-
 assert.doesNotMatch(styles, /\.orbit-control/);
+
 const mainSource = await readFile(new URL('./src/main.js', import.meta.url), 'utf8');
 assert.doesNotMatch(mainSource, /orbit-control/);
 assert.match(mainSource, /SOFT AURORA CAPSULE/);
 assert.match(mainSource, /total-count/);
+assert.match(mainSource, /card\.dataset\.profile/);
+assert.match(mainSource, /viewer\.dataset\.profile/);
+assert.match(mainSource, /motion-paused/);
 
 const shaderSource = await readFile(new URL('./src/cosmic-shader.js', import.meta.url), 'utf8');
 assert.match(shaderSource, /renderPolar/);
@@ -116,6 +118,13 @@ assert.match(fallbackSource, /drawVercel/);
 assert.match(fallbackSource, /mintPulse/);
 assert.match(fallbackSource, /goldPulse/);
 assert.match(fallbackSource, /pinkPulse/);
+
+const auroraStyles = await readFile(new URL('./aurora.css', import.meta.url), 'utf8');
+assert.match(auroraStyles, /data-profile="vercel"/);
+assert.match(auroraStyles, /vercel-color-takeover/);
+assert.match(auroraStyles, /vercel-visible-sweep/);
+assert.match(auroraStyles, /background-size:\s*96% 112%/);
+assert.match(auroraStyles, /animation-duration:\s*3\.2s/);
 
 const readmeZh = await readFile(new URL('./README.md', import.meta.url), 'utf8');
 const readmeEn = await readFile(new URL('./README.en.md', import.meta.url), 'utf8');
