@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1910" height="1100" viewBox="0 0 1910 1100" role="img" aria-label="画境观屿九组宇宙胶囊完整预览">
+  <defs>
+    <filter id="shadow" x="-25%" y="-35%" width="150%" height="180%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#5d584e" flood-opacity=".14"/>
+    </filter>
+    <filter id="marble1" x="-20%" y="-30%" width="140%" height="160%">
+      <feTurbulence type="fractalNoise" baseFrequency=".012 .045" numOctaves="4" seed="17" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="78" xChannelSelector="R" yChannelSelector="B" result="d"/>
+      <feTurbulence type="turbulence" baseFrequency=".018 .07" numOctaves="3" seed="8" result="n2"/>
+      <feBlend in="d" in2="n2" mode="soft-light"/>
+    </filter>
+    <filter id="marble2" x="-20%" y="-30%" width="140%" height="160%">
+      <feTurbulence type="fractalNoise" baseFrequency=".009 .038" numOctaves="4" seed="33" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="92" xChannelSelector="G" yChannelSelector="R" result="d"/>
+      <feTurbulence type="turbulence" baseFrequency=".025 .06" numOctaves="2" seed="4" result="n2"/>
+      <feBlend in="d" in2="n2" mode="screen"/>
+    </filter>
+    <linearGradient id="paperFade" x1="0" x2="1"><stop offset="0" stop-color="#fbfaf5"/><stop offset=".72" stop-color="#fbfaf5"/><stop offset="1" stop-color="#fbfaf5" stop-opacity="0"/></linearGradient>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff1df"/><stop offset=".22" stop-color="#f8b568"/><stop offset=".56" stop-color="#ff63bf"/><stop offset=".8" stop-color="#d369f0"/><stop offset="1" stop-color="#8b52d8"/></linearGradient>
+    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f5fbff"/><stop offset=".3" stop-color="#b4e3ff"/><stop offset=".62" stop-color="#4aa0f5"/><stop offset="1" stop-color="#275fd0"/></linearGradient>
+    <linearGradient id="g3" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#eef4ff"/><stop offset=".28" stop-color="#456fe0"/><stop offset=".66" stop-color="#16254d"/><stop offset="1" stop-color="#e28a47"/></linearGradient>
+    <linearGradient id="g4" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#faf8ff"/><stop offset=".34" stop-color="#d5c2ff"/><stop offset=".72" stop-color="#9a7be5"/><stop offset="1" stop-color="#d7dc55"/></linearGradient>
+    <linearGradient id="g5" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f9fafb"/><stop offset=".3" stop-color="#cbd0d8"/><stop offset=".7" stop-color="#858c98"/><stop offset="1" stop-color="#4a505a"/></linearGradient>
+    <linearGradient id="g6" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff5e8"/><stop offset=".28" stop-color="#ffd178"/><stop offset=".65" stop-color="#ff8a68"/><stop offset="1" stop-color="#ea6479"/></linearGradient>
+    <radialGradient id="g7" cx="96%" cy="54%" r="75%"><stop stop-color="#fff9b2"/><stop offset=".12" stop-color="#fff"/><stop offset=".28" stop-color="#ff33dc"/><stop offset=".58" stop-color="#a32983"/><stop offset="1" stop-color="#202126"/></radialGradient>
+    <radialGradient id="g8" cx="98%" cy="55%" r="74%"><stop stop-color="#2fc2f6"/><stop offset=".34" stop-color="#a7dcff"/><stop offset=".64" stop-color="#e9f7ff"/><stop offset="1" stop-color="#fff"/></radialGradient>
+    <radialGradient id="g9" cx="98%" cy="82%" r="82%"><stop stop-color="#ff8ec1"/><stop offset=".28" stop-color="#ffd3ae"/><stop offset=".54" stop-color="#fff4d8"/><stop offset=".76" stop-color="#d8f4ee"/><stop offset="1" stop-color="#fff"/></radialGradient>
+    <style>
+      .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.12em}.sans{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}.top{font-size:9px;fill:#4e504a}.live{font-size:8px;fill:#77786f}.code{font-size:9px;fill:#77786f}.name{font-size:25px;font-weight:720;fill:#20231f;letter-spacing:.015em}.brand{font-size:11px;font-weight:650;fill:#292b27}.brand-en{font-size:6px;fill:#77786f}.state{font-size:6px;fill:#a77a2c}.dark .code,.dark .brand-en{fill:#c9c9ca}.dark .name,.dark .brand{fill:#fff}.dark .state{fill:#5ce8dd}
+    </style>
+  </defs>
+  <rect width="1910" height="1100" fill="#f4f1e8"/>
+  <path d="M235 7H1677" stroke="#bdb8ad" stroke-opacity=".55"/>
+  <g class="sans" transform="translate(236 65)">
+    <text class="mono" font-size="10" font-weight="700" fill="#20231f">COLOR AS A LIVING SYSTEM.</text>
+    <text x="0" y="55" font-size="34" font-weight="760" fill="#20231f">让固定的形状，</text>
+    <text x="0" y="94" font-size="34" font-weight="760" fill="#20231f">拥有会呼吸的宇</text>
+    <text x="0" y="133" font-size="34" font-weight="760" fill="#20231f">宙。</text>
+    <text x="0" y="184" font-size="13" fill="#77786f">九组持续生成的流体材质，在奶油白胶囊中缓慢</text>
+    <text x="0" y="207" font-size="13" fill="#77786f">迁移。移动鼠标或触摸画面，可短暂改变星云与</text>
+    <text x="0" y="230" font-size="13" fill="#77786f">柔光带的引力方向。</text>
+  </g>
+  <g transform="translate(238 804)" class="sans">
+    <rect width="282" height="43" rx="22" fill="#dedbd2"/><rect x="4" y="4" width="88" height="35" rx="18" fill="#20231f"/>
+    <text x="48" y="27" text-anchor="middle" font-size="10" fill="#fff">全部</text><text x="140" y="27" text-anchor="middle" font-size="10" fill="#77786f">冷调</text><text x="232" y="27" text-anchor="middle" font-size="10" fill="#77786f">暖调</text>
+    <g class="mono" font-size="8" fill="#77786f" transform="translate(0 78)">
+      <text y="0">○  NC-01  ORIGINAL</text><text y="22">○  NC-02  OCEAN</text><text y="44">○  NC-03  KLEIN</text><text y="66">○  NC-04  ULTRAVIOLET</text><text y="88">○  NC-05  CHROME</text><text y="110">○  NC-06  PLUS</text><text y="132">○  NC-07  POLAR</text><text y="154">○  NC-08  DUBDOT</text><text y="176">○  NC-09  VERCEL</text><text y="211">09 / 09</text>
+    </g>
+  </g>
+
+  <!-- ORIGINAL -->
+  <g transform="translate(645 73)" class="sans">
+    <text class="top mono">NC-01  <tspan font-weight="700">ORIGINAL</tspan></text><text x="477" class="live mono">LIVE</text>
+    <g transform="translate(0 17)" filter="url(#shadow)"><rect width="505" height="145" rx="73" fill="url(#g1)" filter="url(#marble1)"/><rect width="205" height="145" rx="73" fill="url(#paperFade)"/><g transform="translate(35 31)"><text class="code mono">NC-01</text><text y="35" class="name">ORIGINAL</text><text y="62" class="brand">画境观屿</text><text y="79" class="brand-en mono">HUA JING GUAN YU</text><text y="92" class="state mono">LIVE COSMIC STUDY</text></g></g>
+  </g>
+  <!-- OCEAN -->
+  <g transform="translate(1182 73)" class="sans">
+    <text class="top mono">NC-02  <tspan font-weight="700">OCEAN</tspan></text><text x="477" class="live mono">LIVE</text>
+    <g transform="translate(0 17)" filter="url(#shadow)"><rect width="505" height="145" rx="73" fill="url(#g2)" filter="url(#marble2)"/><rect width="205" height="145" rx="73" fill="url(#paperFade)"/><g transform="translate(35 31)"><text class="code mono">NC-02</text><text y="35" class="name">OCEAN</text><text y="62" class="brand">画境观屿</text><text y="79" class="brand-en mono">HUA JING GUAN YU</text><text y="92" class="state mono">LIVE COSMIC STUDY</text></g></g>
+  </g>
+  <!-- KLEIN -->
+  <g transform="translate(645 282)" class="sans">
+    <text class="top mono">NC-03  <tspan font-weight="700">KLEIN</tspan></text><text x="477" class="live mono">LIVE</text>
+    <g transform="translate(0 17)" filter="url(#shadow)"><rect width="505" height="145" rx="73" fill="url(#g3)" filter="url(#marble2)"/><rect width="205" height="145" rx="73" fill="url(#paperFade)"/><g transform="translate(35 31)"><text class="code mono">NC-03</text><text y="35" class="name">KLEIN</text><text y="62" class="brand">画境观屿</text><text y="79" class="brand-en mono">HUA JING GUAN YU</text><text y="92" class="state mono">LIVE COSMIC STUDY</text></g></g>
+  </g>
+  <!-- ULTRAVIOLET -->
+  <g transform="translate(1182 282)" class="sans">
+    <text class="top mono">NC-04  <tspan font-weight="700">ULTRAVIOLET</tspan></text><text x="477" class="live mono">LIVE</text>
+    <g transform="translate(0 17)" filter="url(#shadow)"><rect width="505" height="145" rx="73" fill="url(#g4)" filter="url(#marble1)"/><rect width="205" height="145" rx="73" fill="url(#paperFade)"/><g transform="translate(35 31)"><text class="code mono">NC-04</text><text y="35" class="name">ULTRAVIOLET</text><text y="62" class="brand">画境观屿</text><text y="79" class="brand-en mono">HUA JING GUAN YU</text><text y="92" class="state mono">LIVE COSMIC STUDY</text></g></g>
+  </g>
+  <!-- CHROME -->
+  <g transform="translate(645 491)" class="sans">
+    <text class="top mono">NC-05  <tspan font-weight="700">CHROME</tspan></text><text x="477" class="live mono">LIVE</text>
+    <g transform="translate(0 17)" filter="url(#shadow)"><rect width="505" height="145" rx="73" fill="url(#g5)" filter="url(#marble1)"/><rect width="205" height="145" rx="73" fill="url(#paperFade)"/><g transform="translate(35 31)"><text class="code mono">NC-05</text><text y="35" class="name">CHROME</text><text y="62" class="brand">画境观屿</text><text y="79" class="brand-en mono">HUA JING GUAN YU</text><text y="92" class="state mono">LIVE COSMIC STUDY</text></g></g>
+  </g>
+  <!-- PLUS -->
+  <g transform="translate(1182 491)" class="sans">
+    <text class="top mono">NC-06  <tspan font-weight="700">PLUS</tspan></text><text x="477" class="live mono">LIVE</text>
+    <g transform="translate(0 17)" filter="url(#shadow)"><rect width="505" height="145" rx="73" fill="url(#g6)" filter="url(#marble2)"/><rect width="205" height="145" rx="73" fill="url(#paperFade)"/><g transform="translate(35 31)"><text class="code mono">NC-06</text><text y="35" class="name">PLUS</text><text y="62" class="brand">画境观屿</text><text y="79" class="brand-en mono">HUA JING GUAN YU</text><text y="92" class="state mono">LIVE COSMIC STUDY</text></g></g>
+  </g>
+  <!-- POLAR: intentionally no border and no outer shadow -->
+  <g transform="translate(645 700)" class="sans dark">
+    <text class="top mono">NC-07  <tspan font-weight="700">POLAR</tspan></text><text x="477" class="live mono">LIVE</text>
+    <g transform="translate(0 17)"><rect width="505" height="145" rx="73" fill="url(#g7)"/><rect width="220" height="145" rx="73" fill="#202126"/><rect x="185" width="90" height="145" fill="url(#g7)" opacity=".18"/><g transform="translate(35 31)"><text class="code mono">NC-07</text><text y="35" class="name">POLAR</text><text y="62" class="brand">YOU MADE A SALE</text><text y="79" class="brand-en mono">SOFT AURORA CAPSULE</text><text y="92" class="state mono">LIVE AURORA STUDY</text></g></g>
+  </g>
+  <!-- DUBDOT -->
+  <g transform="translate(1182 700)" class="sans">
+    <text class="top mono">NC-08  <tspan font-weight="700">DUBDOT</tspan></text><text x="477" class="live mono">LIVE</text>
+    <g transform="translate(0 17)" filter="url(#shadow)"><rect width="505" height="145" rx="73" fill="url(#g8)"/><rect width="205" height="145" rx="73" fill="url(#paperFade)"/><g transform="translate(35 31)"><text class="code mono">NC-08</text><text y="35" class="name">DUBDOT</text><text y="62" class="brand">$2000 COMMISSION</text><text y="79" class="brand-en mono">SOFT AURORA CAPSULE</text><text y="92" class="state mono">LIVE AURORA STUDY</text></g></g>
+  </g>
+  <!-- VERCEL -->
+  <g transform="translate(645 909)" class="sans">
+    <text class="top mono">NC-09  <tspan font-weight="700">VERCEL</tspan></text><text x="477" class="live mono">LIVE</text>
+    <g transform="translate(0 17)" filter="url(#shadow)"><rect width="505" height="145" rx="73" fill="url(#g9)"/><rect width="205" height="145" rx="73" fill="url(#paperFade)"/><g transform="translate(35 31)"><text class="code mono">NC-09</text><text y="35" class="name">VERCEL</text><text y="62" class="brand">DEPLOYMENT IN 24H</text><text y="79" class="brand-en mono">SOFT AURORA CAPSULE</text><text y="92" class="state mono">LIVE AURORA STUDY</text></g></g>
+  </g>
+</svg>
