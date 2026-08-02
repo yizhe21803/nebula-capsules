@@ -5,13 +5,13 @@
 九组实时生成的流体胶囊：**Original、Ocean、Klein、Ultraviolet、Chrome、Plus、Polar、Dubdot、Vercel**。
 
 - `NC-01 ~ NC-06`：宇宙星云流体模式
-- `NC-07 POLAR`：黑底青绿、蓝紫柔光带
-- `NC-08 DUBDOT`：白底奶油橙、珊瑚粉柔光带
-- `NC-09 VERCEL`：白底薄荷青、天蓝与淡紫柔光带
+- `NC-07 POLAR`：深色胶囊，橙色、洋红与暖白柔光带；外圈不绘制黑色描边
+- `NC-08 DUBDOT`：白色胶囊，浅蓝、天蓝与青蓝柔光带
+- `NC-09 VERCEL`：白色胶囊，薄荷绿、淡黄与浅粉柔光带
 
-新增三组严格按照参考图片的实际顺序追加，并使用独立的 `aurora` 柔光动效模式。页面继续支持 WebGL2、Canvas 2D 降级、自动播放、鼠标与触摸引力、暂停、随机形态、冷暖筛选和沉浸式预览。
+新增三组严格按照参考图片的实际顺序追加，并使用独立的 `aurora` 柔光动效模式。三组均通过 WebGL2 内部流体渲染，WebGL2 不可用时自动切换到 Canvas 2D 降级动效。页面继续支持自动播放、鼠标与触摸引力、暂停、随机形态、冷暖筛选和沉浸式预览。
 
-![画境观屿宇宙胶囊预览](assets/preview-v1.0.3.svg)
+![画境观屿九组宇宙胶囊预览](assets/preview-v2.0.1.svg)
 
 ## 一键启动（推荐）
 
@@ -63,7 +63,7 @@ NC-08 DUBDOT
 NC-09 VERCEL
 ```
 
-`POLAR` 使用独立深色文字区；`DUBDOT` 与 `VERCEL` 保持白色胶囊底。WebGL2 不可用时，会自动切换到 Canvas 2D 柔光降级动画。
+`POLAR` 使用无外圈描边的深色文字区；`DUBDOT` 与 `VERCEL` 保持白色胶囊底。三组使用同一套 WebGL / Canvas 内部流带渲染标准，不叠加独立 CSS 扫光或云层动画。
 
 ## 开发与验证
 
