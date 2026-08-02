@@ -78,6 +78,8 @@ assert.deepEqual(PRESETS.map((item) => item.name), [
 assert.deepEqual(PRESETS.slice(-3).map((item) => item.mode), ['aurora', 'aurora', 'aurora']);
 assert.deepEqual(PRESETS.slice(-3).map((item) => item.motionProfile), ['polar', 'dubdot', 'vercel']);
 assert.deepEqual(PRESETS.slice(-3).map((item) => item.code), ['NC-07', 'NC-08', 'NC-09']);
+
+assert.equal(PRESETS.find((item) => item.code === 'NC-09')?.speed, 0.36);
 assert.deepEqual(PRESETS.slice(-3).map((item) => item.colors), [
   ['#202126', '#FF7A1A', '#FF22D3', '#FFF7A3'],
   ['#FFFFFF', '#DDEEFF', '#A7DBFF', '#27B8F3'],
@@ -100,6 +102,10 @@ const shaderSource = await readFile(new URL('./src/cosmic-shader.js', import.met
 assert.match(shaderSource, /renderPolar/);
 assert.match(shaderSource, /renderDubdot/);
 assert.match(shaderSource, /renderVercel/);
+assert.match(shaderSource, /mintPulse/);
+assert.match(shaderSource, /goldPulse/);
+assert.match(shaderSource, /pinkPulse/);
+assert.match(shaderSource, /movingGap/);
 assert.match(shaderSource, /u_profile/);
 assert.match(shaderSource, /AURORA_PROFILE/);
 
@@ -107,6 +113,9 @@ const fallbackSource = await readFile(new URL('./src/fallback.js', import.meta.u
 assert.match(fallbackSource, /drawPolar/);
 assert.match(fallbackSource, /drawDubdot/);
 assert.match(fallbackSource, /drawVercel/);
+assert.match(fallbackSource, /mintPulse/);
+assert.match(fallbackSource, /goldPulse/);
+assert.match(fallbackSource, /pinkPulse/);
 
 const readmeZh = await readFile(new URL('./README.md', import.meta.url), 'utf8');
 const readmeEn = await readFile(new URL('./README.en.md', import.meta.url), 'utf8');
