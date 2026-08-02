@@ -104,10 +104,11 @@ const shaderSource = await readFile(new URL('./src/cosmic-shader.js', import.met
 assert.match(shaderSource, /renderPolar/);
 assert.match(shaderSource, /renderDubdot/);
 assert.match(shaderSource, /renderVercel/);
-assert.match(shaderSource, /mintPulse/);
-assert.match(shaderSource, /goldPulse/);
-assert.match(shaderSource, /pinkPulse/);
-assert.match(shaderSource, /movingGap/);
+assert.match(shaderSource, /mintBand/);
+assert.match(shaderSource, /goldBand/);
+assert.match(shaderSource, /pinkBand/);
+assert.match(shaderSource, /rightBody/);
+assert.match(shaderSource, /separation/);
 assert.match(shaderSource, /u_profile/);
 assert.match(shaderSource, /AURORA_PROFILE/);
 
@@ -115,18 +116,12 @@ const fallbackSource = await readFile(new URL('./src/fallback.js', import.meta.u
 assert.match(fallbackSource, /drawPolar/);
 assert.match(fallbackSource, /drawDubdot/);
 assert.match(fallbackSource, /drawVercel/);
-assert.match(fallbackSource, /mintPulse/);
-assert.match(fallbackSource, /goldPulse/);
-assert.match(fallbackSource, /pinkPulse/);
+assert.match(fallbackSource, /phase = time \* 1\.62/);
 
 const auroraStyles = await readFile(new URL('./aurora.css', import.meta.url), 'utf8');
-assert.match(auroraStyles, /data-profile="vercel"/);
-assert.match(auroraStyles, /vercel-layer-motion/);
+assert.doesNotMatch(auroraStyles, /data-profile="vercel"/);
+assert.doesNotMatch(auroraStyles, /vercel-layer-motion/);
 assert.doesNotMatch(auroraStyles, /vercel-visible-sweep/);
-assert.doesNotMatch(auroraStyles, /viewer\[data-profile="vercel"\]\s+\.viewer-stage::after/);
-assert.match(auroraStyles, /background-size:\s*122% 142%/);
-assert.match(auroraStyles, /animation:\s*vercel-layer-motion 2\.8s/);
-assert.match(auroraStyles, /animation-duration:\s*2\.5s/);
 
 const readmeZh = await readFile(new URL('./README.md', import.meta.url), 'utf8');
 const readmeEn = await readFile(new URL('./README.en.md', import.meta.url), 'utf8');
