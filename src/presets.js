@@ -89,7 +89,7 @@ export const PRESETS = [
     motionProfile: 'vercel',
     theme: 'light',
     seed: 89.9,
-    speed: 0.25,
+    speed: 0.36,
     colors: ['#FFFFFF', '#BCEFEA', '#FFD76A', '#FF8BB6']
   }
 ];
