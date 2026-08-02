@@ -75,25 +75,55 @@ export class FallbackRenderer {
   drawVercel(time) {
     const ctx = this.context;
     const { width, height } = this.canvas;
-    const phase = time * 1.18 + this.preset.seed * 0.044;
-    const mintPulse = 0.72 + Math.sin(phase * 1.18) * 0.28;
-    const goldPulse = 0.74 + Math.sin(phase * 1.37 + 1.6) * 0.26;
-    const pinkPulse = 0.70 + Math.sin(phase * 1.06 + 3.1) * 0.30;
+    const phase = time * 1.62 + this.preset.seed * 0.044;
 
     ctx.fillStyle = this.preset.colors[0];
     ctx.fillRect(0, 0, width, height);
     ctx.globalCompositeOperation = 'screen';
 
-    ellipseGlow(ctx, width, height, 0.78 + Math.sin(phase * 0.82) * 0.16, 0.78 + Math.cos(phase * 0.67) * 0.14, 0.60, 0.39, this.preset.colors[1], 0.82 * mintPulse);
-    ellipseGlow(ctx, width, height, 0.92 + Math.cos(phase * 0.55) * 0.10, 0.66 + Math.sin(phase * 0.92) * 0.11, 0.40, 0.25, this.preset.colors[1], 0.58 * (1 - mintPulse + 0.28));
+    ellipseGlow(
+      ctx, width, height,
+      0.84 + Math.sin(phase * 0.68) * 0.12,
+      0.73 + Math.cos(phase * 0.82) * 0.15,
+      0.66, 0.34,
+      this.preset.colors[1], 0.78
+    );
+    ellipseGlow(
+      ctx, width, height,
+      0.91 + Math.cos(phase * 0.61 + 1.2) * 0.11,
+      0.50 + Math.sin(phase * 0.77) * 0.17,
+      0.68, 0.36,
+      this.preset.colors[2], 0.82
+    );
+    ellipseGlow(
+      ctx, width, height,
+      0.82 + Math.sin(phase * 0.73 + 2.1) * 0.13,
+      0.27 + Math.cos(phase * 0.66) * 0.15,
+      0.66, 0.34,
+      this.preset.colors[3], 0.78
+    );
 
-    ellipseGlow(ctx, width, height, 0.88 + Math.cos(phase * 0.71) * 0.14, 0.50 + Math.sin(phase * 0.59) * 0.16, 0.62, 0.40, this.preset.colors[2], 0.86 * goldPulse);
-    ellipseGlow(ctx, width, height, 0.73 + Math.sin(phase * 0.88 + 1.2) * 0.12, 0.55 + Math.cos(phase * 0.66) * 0.12, 0.42, 0.26, this.preset.colors[2], 0.58 * (1 - goldPulse + 0.26));
-
-    ellipseGlow(ctx, width, height, 0.79 + Math.sin(phase * 0.63 + 1.7) * 0.18, 0.22 + Math.cos(phase * 0.74) * 0.13, 0.60, 0.39, this.preset.colors[3], 0.82 * pinkPulse);
-    ellipseGlow(ctx, width, height, 0.93 + Math.cos(phase * 0.79 + 0.8) * 0.11, 0.34 + Math.sin(phase * 0.58) * 0.10, 0.40, 0.24, this.preset.colors[3], 0.60 * (1 - pinkPulse + 0.30));
-
-    ellipseGlow(ctx, width, height, 0.84 + Math.sin(phase * 1.07) * 0.10, 0.50 + Math.cos(phase * 0.72) * 0.15, 0.34, 0.18, this.preset.colors[2], 0.30);
+    ellipseGlow(
+      ctx, width, height,
+      0.94 + Math.sin(phase * 0.92) * 0.055,
+      0.68 + Math.cos(phase * 1.04) * 0.09,
+      0.30, 0.16,
+      this.preset.colors[1], 0.42
+    );
+    ellipseGlow(
+      ctx, width, height,
+      0.89 + Math.cos(phase * 0.86) * 0.060,
+      0.49 + Math.sin(phase * 0.98) * 0.10,
+      0.31, 0.17,
+      this.preset.colors[2], 0.46
+    );
+    ellipseGlow(
+      ctx, width, height,
+      0.93 + Math.sin(phase * 0.81 + 1.6) * 0.058,
+      0.30 + Math.cos(phase * 0.91) * 0.09,
+      0.30, 0.16,
+      this.preset.colors[3], 0.43
+    );
 
     ctx.globalCompositeOperation = 'source-over';
   }
