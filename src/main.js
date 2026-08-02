@@ -36,6 +36,7 @@ function createRenderer(canvas, preset, options) {
 function openViewer(preset) {
   viewerTitle.textContent = preset.name;
   viewerCode.textContent = preset.code;
+  viewer.dataset.profile = preset.motionProfile || '';
   viewer.showModal();
   viewerRenderer?.dispose();
   viewerRenderer = createRenderer(viewerCanvas, preset, { dprCap: 2 });
@@ -53,6 +54,7 @@ function createCard(preset) {
   card.className = 'capsule-card';
   card.dataset.group = preset.group;
   card.dataset.mode = preset.mode || 'nebula';
+  card.dataset.profile = preset.motionProfile || '';
   card.dataset.theme = preset.theme || 'light';
   card.setAttribute('aria-label', `打开 ${preset.name} 沉浸预览`);
   const subtitle = preset.subtitle || '画境观屿';
@@ -106,6 +108,7 @@ function updatePauseControl() {
   pauseButton.setAttribute('aria-pressed', String(paused));
   pauseIcon.textContent = paused ? '▶' : 'Ⅱ';
   pauseLabel.textContent = paused ? '继续动效' : '暂停动效';
+  document.documentElement.classList.toggle('motion-paused', paused);
 }
 
 pauseButton.addEventListener('click', () => {
