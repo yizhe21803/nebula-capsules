@@ -122,8 +122,9 @@ const auroraStyles = await readFile(new URL('./aurora.css', import.meta.url), 'u
 assert.doesNotMatch(auroraStyles, /data-profile="vercel"/);
 assert.doesNotMatch(auroraStyles, /vercel-layer-motion/);
 assert.doesNotMatch(auroraStyles, /vercel-visible-sweep/);
-assert.match(auroraStyles, /\.capsule-card\[data-theme="dark"\] \.capsule-stage\s*\{[\s\S]*?border-color:\s*transparent;/);
-assert.doesNotMatch(auroraStyles, /\.capsule-card\[data-theme="dark"\] \.capsule-stage\s*\{[\s\S]*?border-color:\s*rgba\(/);
+assert.match(auroraStyles, /\.capsule-card\[data-theme="dark"\] \.capsule-stage\s*\{[\s\S]*?border:\s*0 !important;/);
+assert.match(auroraStyles, /\.capsule-card\[data-theme="dark"\] \.capsule-stage\s*\{[\s\S]*?box-shadow:\s*none !important;/);
+assert.doesNotMatch(auroraStyles, /\.capsule-card\[data-theme="dark"\] \.capsule-stage\s*\{[\s\S]*?box-shadow:\s*0 /);
 
 const readmeZh = await readFile(new URL('./README.md', import.meta.url), 'utf8');
 const readmeEn = await readFile(new URL('./README.en.md', import.meta.url), 'utf8');
