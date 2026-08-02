@@ -122,10 +122,16 @@ const auroraStyles = await readFile(new URL('./aurora.css', import.meta.url), 'u
 assert.doesNotMatch(auroraStyles, /data-profile="vercel"/);
 assert.doesNotMatch(auroraStyles, /vercel-layer-motion/);
 assert.doesNotMatch(auroraStyles, /vercel-visible-sweep/);
+assert.match(auroraStyles, /\.capsule-card\[data-theme="dark"\] \.capsule-stage\s*\{[\s\S]*?border-color:\s*transparent;/);
+assert.doesNotMatch(auroraStyles, /\.capsule-card\[data-theme="dark"\] \.capsule-stage\s*\{[\s\S]*?border-color:\s*rgba\(/);
 
 const readmeZh = await readFile(new URL('./README.md', import.meta.url), 'utf8');
 const readmeEn = await readFile(new URL('./README.en.md', import.meta.url), 'utf8');
 assert.match(readmeZh, /一键启动（推荐）/);
 assert.match(readmeEn, /One-click launchers \(recommended\)/);
+assert.match(readmeZh, /assets\/preview-v2\.0\.1\.svg/);
+assert.match(readmeEn, /assets\/preview-v2\.0\.1\.svg/);
+assert.match(readmeZh, /外圈不绘制黑色描边/);
+assert.match(readmeEn, /no dark outer outline/);
 
 console.log('All smoke tests passed.');
