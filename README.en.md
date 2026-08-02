@@ -11,7 +11,7 @@ Nine realtime generative capsules: **Original, Ocean, Klein, Ultraviolet, Chrome
 
 The three new styles are appended in the exact reference-image order and use dedicated `aurora` motion profiles. All three are rendered inside the WebGL2 fluid pipeline, with Canvas 2D fallback when WebGL2 is unavailable. The page continues to support autoplay, pointer/touch gravity, pause controls, randomization, cool/warm filtering, and an immersive viewer.
 
-![Huajing Guanyu nine-capsule preview](assets/preview-v2.0.4.svg)
+![Huajing Guanyu nine-capsule preview](assets/preview-v2.0.4.png)
 
 ## One-click launchers (recommended)
 
