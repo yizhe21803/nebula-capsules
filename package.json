@@ -1,9 +1,9 @@
 {
   "name": "huajing-cosmic-capsules",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "private": false,
   "type": "module",
-  "description": "画境观屿：九组原有 WebGL 宇宙与柔光胶囊，加三组经三轮原视频对比校准的 WebGL 流体进度胶囊与 Canvas 降级。",
+  "description": "画境观屿：九组原有 WebGL 宇宙与柔光胶囊，加三组经原视频实测对比校准的 WebGL 流体进度胶囊与 Canvas 降级。",
   "scripts": {
     "start": "node scripts/serve.mjs",
     "dev": "node scripts/serve.mjs",
