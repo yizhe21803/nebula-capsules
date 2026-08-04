@@ -4,10 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#f3f0e8" />
-    <meta name="description" content="画境观屿 · 九组实时流动的宇宙与柔光胶囊 WebGL 视觉实验。" />
+    <meta name="description" content="画境观屿 · 十二组实时流动的宇宙、柔光与可拖动进度胶囊视觉实验。" />
     <title>画境观屿 · 宇宙胶囊</title>
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="aurora.css" />
+    <link rel="stylesheet" href="progress.css" />
   </head>
   <body>
     <main class="page-shell">
@@ -32,17 +33,18 @@
           <p class="section-kicker">COLOR AS A LIVING SYSTEM.</p>
           <h2 id="intro-title">让固定的形状，<br />拥有会呼吸的宇宙。</h2>
           <p class="intro-copy">
-            九组持续生成的流体材质，在奶油白胶囊中缓慢迁移。移动鼠标或触摸画面，可短暂改变星云与柔光带的引力方向。
+            十二组持续生成的胶囊视觉：原有九组流体材质保持不变，新增三组进度胶囊支持自动加载，也可直接拖动发光边界调整百分比。
           </p>
 
           <div class="filters" role="group" aria-label="胶囊筛选">
             <button class="filter-button is-active" data-filter="all" type="button">全部</button>
             <button class="filter-button" data-filter="cold" type="button">冷调</button>
             <button class="filter-button" data-filter="warm" type="button">暖调</button>
+            <button class="filter-button" data-filter="progress" type="button">进度</button>
           </div>
 
           <ol class="capsule-index" id="capsule-index"></ol>
-          <p class="capsule-count"><span id="visible-count">09</span> / <span id="total-count">09</span></p>
+          <p class="capsule-count"><span id="visible-count">12</span> / <span id="total-count">12</span></p>
         </aside>
 
         <div class="capsule-grid" id="capsule-grid" aria-live="polite"></div>
@@ -71,7 +73,8 @@
       </div>
     </dialog>
 
-    <noscript>该页面需要启用 JavaScript 才能播放宇宙流体动效。</noscript>
+    <noscript>该页面需要启用 JavaScript 才能播放宇宙流体与进度动效。</noscript>
     <script type="module" src="src/main.js"></script>
+    <script type="module" src="src/progress-entry.js"></script>
   </body>
 </html>
