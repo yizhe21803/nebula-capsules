@@ -1,5 +1,6 @@
 import { PROGRESS_PRESETS } from './progress-presets.js';
 import { createProgressCapsules } from './progress-capsules.js';
+import { createProgressFlowOverlays } from './progress-flow-overlays.js';
 
 const LEGACY_CAPSULE_COUNT = 9;
 
@@ -17,7 +18,7 @@ function mountProgressCapsules() {
 
   if (grid.dataset.progressMounted === 'true') return;
 
-  // 不修改原渲染器：等待 main.js 完成 NC-01～NC-09 挂载后，再追加三条进度胶囊。
+  // Do not touch the original renderer. Wait until main.js has mounted NC-01 through NC-09.
   if (grid.children.length < LEGACY_CAPSULE_COUNT || indexList.children.length < LEGACY_CAPSULE_COUNT) {
     requestAnimationFrame(mountProgressCapsules);
     return;
@@ -26,6 +27,7 @@ function mountProgressCapsules() {
   grid.dataset.progressMounted = 'true';
 
   const progressCapsules = createProgressCapsules({ grid, indexList });
+  const flowOverlays = createProgressFlowOverlays(progressCapsules.cards, PROGRESS_PRESETS);
   const totalItems = grid.children.length;
   const totalText = String(totalItems).padStart(2, '0');
 
@@ -40,6 +42,7 @@ function mountProgressCapsules() {
 
   let lastFrame = performance.now();
   let pageVisible = !document.hidden;
+  let flowTime = 0;
 
   document.addEventListener('visibilitychange', () => {
     pageVisible = !document.hidden;
@@ -53,6 +56,8 @@ function mountProgressCapsules() {
 
     if (pageVisible) {
       progressCapsules.update(delta, paused, now);
+      if (!paused) flowTime += delta;
+      flowOverlays.update(flowTime);
     }
 
     requestAnimationFrame(update);
