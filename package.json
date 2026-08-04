@@ -1,13 +1,13 @@
 {
   "name": "huajing-cosmic-capsules",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "private": false,
   "type": "module",
-  "description": "画境观屿：九组原有 WebGL 宇宙与柔光胶囊，加三组依据原视频二次实测对比修正的可拖动流体进度胶囊。",
+  "description": "画境观屿：九组原有 WebGL 宇宙与柔光胶囊，加三组经三轮原视频对比校准的 WebGL 流体进度胶囊与 Canvas 降级。",
   "scripts": {
     "start": "node scripts/serve.mjs",
     "dev": "node scripts/serve.mjs",
-    "check": "node --check src/main.js && node --check src/cosmic-shader.js && node --check src/fallback.js && node --check src/presets.js && node --check src/progress-presets.js && node --check src/progress-capsules.js && node --check src/progress-entry.js && node --check scripts/serve.mjs",
+    "check": "node --check src/main.js && node --check src/cosmic-shader.js && node --check src/fallback.js && node --check src/presets.js && node --check src/progress-presets.js && node --check src/progress-capsules.js && node --check src/progress-flow-renderer.js && node --check src/progress-flow-overlays.js && node --check src/progress-entry.js && node --check scripts/serve.mjs",
     "test": "node tests.mjs && node progress-tests.mjs"
   },
   "license": "MIT",
