@@ -2,7 +2,6 @@ import { PROGRESS_PRESETS } from './progress-presets.js';
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 const lerp = (start, end, amount) => start + (end - start) * amount;
-const smoothstep = (value) => value * value * (3 - 2 * value);
 
 function hexToRgba(hex, alpha = 1) {
   const normalized = hex.replace('#', '');
@@ -24,34 +23,43 @@ function stringSeed(value) {
 
 const FLOW_PROFILES = {
   'model-training': {
-    large: 11.8,
-    medium: 8.8,
-    fine: 5.0,
-    lobe: 5.2,
-    timeScale: 0.92,
-    detailScale: 1.12,
-    glowWidth: 5.0,
-    haloWidth: 18
+    cycles: [0.98, 3.05, 5.45],
+    amplitudes: [11.2, 11.0, 5.2],
+    speeds: [0.31, -0.53, 0.78],
+    bulgeAmplitude: 8.2,
+    timeScale: 1.0,
+    glowWidth: 5.8,
+    haloWidth: 20,
+    whiteAlpha: 0.72,
+    whiteWidth: 1.15,
+    cloudWidth: 0.17,
+    autoRange: [25, 66]
   },
   'agent-migration': {
-    large: 14.2,
-    medium: 7.0,
-    fine: 2.8,
-    lobe: 6.4,
-    timeScale: 0.74,
-    detailScale: 0.78,
-    glowWidth: 4.2,
-    haloWidth: 22
+    cycles: [0.62, 1.55, 2.95],
+    amplitudes: [16.0, 7.8, 2.3],
+    speeds: [0.25, -0.40, 0.60],
+    bulgeAmplitude: 8.4,
+    timeScale: 0.82,
+    glowWidth: 6.3,
+    haloWidth: 21,
+    whiteAlpha: 0.18,
+    whiteWidth: 0.45,
+    cloudWidth: 0.18,
+    autoRange: [24, 62]
   },
   'visual-training': {
-    large: 12.6,
-    medium: 8.4,
-    fine: 4.0,
-    lobe: 5.8,
-    timeScale: 0.84,
-    detailScale: 0.96,
-    glowWidth: 4.6,
-    haloWidth: 20
+    cycles: [0.88, 2.45, 4.35],
+    amplitudes: [12.8, 10.2, 4.3],
+    speeds: [0.28, -0.47, 0.69],
+    bulgeAmplitude: 7.3,
+    timeScale: 0.91,
+    glowWidth: 6.0,
+    haloWidth: 21,
+    whiteAlpha: 0.30,
+    whiteWidth: 0.55,
+    cloudWidth: 0.175,
+    autoRange: [20, 75]
   }
 };
 
@@ -65,11 +73,13 @@ class ProgressCapsuleController {
     this.context = this.canvas.getContext('2d');
     this.valueElement = card.querySelector('.progress-value');
     this.value = preset.initialProgress;
+    this.targetValue = preset.initialProgress;
     this.dragging = false;
     this.resumeAt = 0;
-    this.completeUntil = 0;
-    this.flowTime = stringSeed(preset.id) * 37;
-    this.noiseSeed = stringSeed(`${preset.id}-flow`) * 97 + 3;
+    this.nextTargetAt = 0;
+    this.flowTime = stringSeed(preset.id) * 31;
+    this.seed = stringSeed(`${preset.id}-reference`) * Math.PI * 2;
+    this.randomState = Math.floor(stringSeed(`${preset.id}-auto`) * 0x7fffffff) || 1;
     this.dpr = 1;
     this.width = 0;
     this.height = 0;
@@ -80,6 +90,11 @@ class ProgressCapsuleController {
     this.setProgress(this.value);
     this.bindEvents();
     this.resizeCanvas();
+  }
+
+  random() {
+    this.randomState = (Math.imul(this.randomState, 1664525) + 1013904223) >>> 0;
+    return this.randomState / 4294967296;
   }
 
   setProgress(nextValue) {
@@ -104,113 +119,63 @@ class ProgressCapsuleController {
     this.drawReferenceFlow();
   }
 
-  hash2D(x, y, salt = 0) {
-    const value = Math.sin(
-      x * 127.1 + y * 311.7 + (this.noiseSeed + salt) * 74.7
-    ) * 43758.5453123;
-    return value - Math.floor(value);
-  }
-
-  valueNoise2D(x, y, salt = 0) {
-    const x0 = Math.floor(x);
-    const y0 = Math.floor(y);
-    const xf = x - x0;
-    const yf = y - y0;
-    const u = smoothstep(xf);
-    const v = smoothstep(yf);
-
-    const a = this.hash2D(x0, y0, salt);
-    const b = this.hash2D(x0 + 1, y0, salt);
-    const c = this.hash2D(x0, y0 + 1, salt);
-    const d = this.hash2D(x0 + 1, y0 + 1, salt);
-    return lerp(lerp(a, b, u), lerp(c, d, u), v);
-  }
-
-  fbm2D(x, y, salt = 0) {
-    let value = 0;
-    let amplitude = 0.56;
-    let frequency = 1;
-    let total = 0;
-
-    for (let octave = 0; octave < 4; octave += 1) {
-      value += this.valueNoise2D(
-        x * frequency + octave * 7.17,
-        y * frequency - octave * 5.31,
-        salt + octave * 13.9
-      ) * amplitude;
-      total += amplitude;
-      frequency *= 2.03;
-      amplitude *= 0.48;
-    }
-
-    return value / total;
-  }
-
   edgeEnvelope(yRatio) {
-    const top = smoothstep(clamp(yRatio / 0.12, 0, 1));
-    const bottom = smoothstep(clamp((1 - yRatio) / 0.12, 0, 1));
-    return Math.pow(top * bottom, 0.72);
+    const edge = Math.sin(Math.PI * clamp(yRatio, 0, 1));
+    return Math.pow(Math.max(edge, 0), 0.48);
+  }
+
+  localBulge(yRatio, time, index) {
+    const direction = index === 0 ? 1 : -1;
+    const center = 0.28 + index * 0.40 + Math.sin(time * (0.19 + index * 0.035) + this.seed * (1.1 + index)) * 0.13;
+    const width = 0.075 + index * 0.016 + Math.sin(time * 0.13 + this.seed * 2.1) * 0.012;
+    const distance = (yRatio - center) / Math.max(width, 0.035);
+    const gaussian = Math.exp(-0.5 * distance * distance);
+    return gaussian * Math.sin(time * (0.71 + index * 0.09) + this.seed * (2.7 + index)) * this.profile.bulgeAmplitude * direction;
   }
 
   edgeOffset(y, time, phase = 0, amplitudeScale = 1) {
-    const { large, medium, fine, lobe, timeScale, detailScale } = this.profile;
     const yRatio = this.height > 0 ? y / this.height : 0;
     const envelope = this.edgeEnvelope(yRatio);
-    const scaledTime = time * timeScale;
+    const scaledTime = time * this.profile.timeScale;
+    let offset = 0;
 
-    const broad = (this.fbm2D(
-      y * 0.0105 + this.noiseSeed * 0.03,
-      scaledTime * 0.105 + phase,
-      1.2
-    ) * 2 - 1) * large;
+    for (let index = 0; index < this.profile.cycles.length; index += 1) {
+      const cycle = this.profile.cycles[index];
+      const amplitude = this.profile.amplitudes[index];
+      const speed = this.profile.speeds[index];
+      const amplitudeMotion = 0.74 + 0.26 * Math.sin(
+        scaledTime * (0.17 + index * 0.045) + this.seed * (index + 2.4)
+      );
+      offset += Math.sin(
+        yRatio * Math.PI * 2 * cycle + scaledTime * speed * Math.PI * 2 + this.seed * (index + 1) + phase
+      ) * amplitude * amplitudeMotion;
+    }
 
-    const middle = (this.fbm2D(
-      y * 0.026 * detailScale + this.noiseSeed * 0.07,
-      scaledTime * 0.22 - phase * 0.63,
-      5.8
-    ) * 2 - 1) * medium;
-
-    const detail = (this.fbm2D(
-      y * 0.070 * detailScale + this.noiseSeed * 0.11,
-      scaledTime * 0.43 + phase * 0.87,
-      11.3
-    ) * 2 - 1) * fine;
-
-    const localLobes = (this.valueNoise2D(
-      y * 0.018 + this.noiseSeed * 0.13,
-      scaledTime * 0.16 + 19.7 + phase,
-      18.4
-    ) * 2 - 1) * lobe;
-
-    return (broad + middle + detail + localLobes) * envelope * amplitudeScale;
+    offset += this.localBulge(yRatio, scaledTime + phase, 0);
+    offset += this.localBulge(yRatio, scaledTime - phase * 0.7, 1);
+    return offset * envelope * amplitudeScale;
   }
 
   createEdgePath(baseX, time, phase = 0, amplitudeScale = 1) {
     const path = new Path2D();
-    const step = Math.max(2, this.height / 64);
+    const step = Math.max(1.8, this.height / 92);
 
     for (let y = 0; y <= this.height + step; y += step) {
       const x = baseX + this.edgeOffset(y, time, phase, amplitudeScale);
       if (y === 0) path.moveTo(x, y);
       else path.lineTo(x, y);
     }
-
     return path;
   }
 
   createFillPath(baseX, time, phase = 0, amplitudeScale = 1) {
     const path = new Path2D();
-    const step = Math.max(2, this.height / 64);
+    const step = Math.max(1.8, this.height / 92);
     path.moveTo(0, 0);
     path.lineTo(baseX + this.edgeOffset(0, time, phase, amplitudeScale), 0);
-
     for (let y = step; y <= this.height + step; y += step) {
-      path.lineTo(
-        baseX + this.edgeOffset(y, time, phase, amplitudeScale),
-        y
-      );
+      path.lineTo(baseX + this.edgeOffset(y, time, phase, amplitudeScale), y);
     }
-
     path.lineTo(0, this.height);
     path.closePath();
     return path;
@@ -223,7 +188,7 @@ class ProgressCapsuleController {
     ctx.scale(1, radiusY / radiusX);
     const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, radiusX);
     gradient.addColorStop(0, hexToRgba(color, alpha));
-    gradient.addColorStop(0.48, hexToRgba(color, alpha * 0.38));
+    gradient.addColorStop(0.42, hexToRgba(color, alpha * 0.48));
     gradient.addColorStop(1, hexToRgba(color, 0));
     ctx.globalCompositeOperation = 'screen';
     ctx.fillStyle = gradient;
@@ -231,56 +196,75 @@ class ProgressCapsuleController {
     ctx.restore();
   }
 
-  drawColorClouds(shoreline, time, accentA, accentB, glow) {
-    const slowTime = time * this.profile.timeScale;
-    const cloudData = [
-      {
-        y: this.height * (0.26 + this.valueNoise2D(slowTime * 0.07, 2.1, 31) * 0.18),
-        x: shoreline - this.width * 0.095,
-        rx: Math.max(58, this.width * 0.16),
-        ry: this.height * 0.54,
-        color: accentA,
-        alpha: 0.34
-      },
-      {
-        y: this.height * (0.66 + (this.valueNoise2D(slowTime * 0.06, 6.7, 44) - 0.5) * 0.28),
-        x: shoreline - this.width * 0.065,
-        rx: Math.max(48, this.width * 0.13),
-        ry: this.height * 0.46,
-        color: accentB,
-        alpha: 0.30
-      },
-      {
-        y: this.height * (0.46 + (this.valueNoise2D(slowTime * 0.09, 10.2, 58) - 0.5) * 0.34),
-        x: shoreline - this.width * 0.025,
-        rx: Math.max(34, this.width * 0.085),
-        ry: this.height * 0.34,
-        color: glow,
-        alpha: 0.18
-      }
-    ];
-
-    for (const cloud of cloudData) {
-      this.drawEllipticalGlow(
-        cloud.x,
-        cloud.y,
-        cloud.rx,
-        cloud.ry,
-        cloud.color,
-        cloud.alpha
-      );
-    }
+  drawDarkEllipticalShadow(x, y, radiusX, radiusY, alpha) {
+    const ctx = this.context;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(1, radiusY / radiusX);
+    const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, radiusX);
+    gradient.addColorStop(0, `rgba(6, 6, 11, ${alpha})`);
+    gradient.addColorStop(0.54, `rgba(8, 8, 14, ${alpha * 0.62})`);
+    gradient.addColorStop(1, 'rgba(8, 8, 14, 0)');
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = gradient;
+    ctx.fillRect(-radiusX, -radiusX, radiusX * 2, radiusX * 2);
+    ctx.restore();
   }
 
-  drawBlurredLayer({ baseX, time, phase, amplitudeScale, color, alpha, blur }) {
+  drawColorClouds(shoreline, time, accentA, accentB, glow) {
+    const width = this.width;
+    const height = this.height;
+    const scale = this.profile.cloudWidth;
+    const t = time * this.profile.timeScale;
+
+    const upperY = height * (0.28 + Math.sin(t * 0.24 + this.seed) * 0.13);
+    const lowerY = height * (0.70 + Math.cos(t * 0.21 + this.seed * 1.7) * 0.12);
+    const middleY = height * (0.49 + Math.sin(t * 0.31 + this.seed * 2.3) * 0.15);
+
+    const farX = shoreline - width * 0.095;
+    const farRx = Math.max(52, width * scale);
+    const farRy = height * 0.42;
+    this.drawEllipticalGlow(farX, upperY, farRx, farRy, accentA, 0.38);
+    this.drawDarkEllipticalShadow(
+      farX + farRx * 0.16,
+      upperY,
+      farRx * 0.58,
+      farRy * 0.66,
+      0.74
+    );
+
+    const lowerX = shoreline - width * 0.072;
+    const lowerRx = Math.max(44, width * scale * 0.82);
+    const lowerRy = height * 0.36;
+    this.drawEllipticalGlow(lowerX, lowerY, lowerRx, lowerRy, accentB, 0.31);
+    this.drawDarkEllipticalShadow(
+      lowerX + lowerRx * 0.14,
+      lowerY,
+      lowerRx * 0.54,
+      lowerRy * 0.62,
+      0.64
+    );
+
+    this.drawEllipticalGlow(
+      shoreline - width * 0.034,
+      middleY,
+      Math.max(30, width * scale * 0.48),
+      height * 0.27,
+      glow,
+      0.20
+    );
+  }
+
+  drawPathBand({ baseX, time, phase, amplitudeScale, color, alpha, blur, width, composite = 'screen' }) {
     const ctx = this.context;
-    const path = this.createFillPath(baseX, time, phase, amplitudeScale);
+    const path = this.createEdgePath(baseX, time, phase, amplitudeScale);
     ctx.save();
-    ctx.globalCompositeOperation = 'screen';
+    ctx.globalCompositeOperation = composite;
     ctx.globalAlpha = alpha;
     ctx.filter = `blur(${blur}px)`;
-    ctx.fillStyle = color;
-    ctx.fill(path);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.stroke(path);
     ctx.restore();
   }
 
@@ -295,87 +279,122 @@ class ProgressCapsuleController {
     const [dark, accentA, accentB, glow] = this.preset.colors;
 
     ctx.clearRect(0, 0, width, height);
-
-    const background = ctx.createLinearGradient(0, 0, width, 0);
-    background.addColorStop(0, '#17171D');
-    background.addColorStop(0.56, '#202126');
-    background.addColorStop(1, '#242529');
-    ctx.fillStyle = background;
+    ctx.fillStyle = '#202126';
     ctx.fillRect(0, 0, width, height);
 
     const mainFill = this.createFillPath(shoreline, time, 0, 1);
-    const bodyGradient = ctx.createLinearGradient(0, 0, Math.max(shoreline + 20, 1), 0);
+    const bodyGradient = ctx.createLinearGradient(0, 0, Math.max(shoreline, 1), 0);
     bodyGradient.addColorStop(0, dark);
-    bodyGradient.addColorStop(0.42, hexToRgba(dark, 0.98));
-    bodyGradient.addColorStop(0.68, hexToRgba(accentA, 0.32));
-    bodyGradient.addColorStop(0.88, hexToRgba(accentB, 0.72));
-    bodyGradient.addColorStop(1, hexToRgba(glow, 0.82));
+    bodyGradient.addColorStop(0.74, dark);
+    bodyGradient.addColorStop(0.89, hexToRgba(dark, 0.99));
+    bodyGradient.addColorStop(0.955, hexToRgba(accentA, 0.09));
+    bodyGradient.addColorStop(0.992, hexToRgba(accentB, 0.54));
+    bodyGradient.addColorStop(1, hexToRgba(glow, 0.78));
     ctx.fillStyle = bodyGradient;
     ctx.fill(mainFill);
 
     this.drawColorClouds(shoreline, time, accentA, accentB, glow);
 
-    this.drawBlurredLayer({
-      baseX: shoreline - 64,
+    this.drawPathBand({
+      baseX: shoreline - width * 0.105,
       time,
-      phase: 7.8,
-      amplitudeScale: 0.76,
+      phase: 1.42,
+      amplitudeScale: 1.18,
       color: accentA,
       alpha: 0.22,
-      blur: 20
+      blur: 21,
+      width: 54
     });
-    this.drawBlurredLayer({
-      baseX: shoreline - 34,
+    this.drawPathBand({
+      baseX: shoreline - width * 0.073,
       time,
-      phase: -4.1,
-      amplitudeScale: 0.86,
+      phase: -0.92,
+      amplitudeScale: 1.06,
       color: accentB,
       alpha: 0.30,
-      blur: 13
+      blur: 15,
+      width: 42
+    });
+    this.drawPathBand({
+      baseX: shoreline - width * 0.047,
+      time,
+      phase: 0.42,
+      amplitudeScale: 0.94,
+      color: 'rgba(5, 5, 10, 0.92)',
+      alpha: 0.72,
+      blur: 12,
+      width: 34,
+      composite: 'source-over'
+    });
+    this.drawPathBand({
+      baseX: shoreline - width * 0.025,
+      time,
+      phase: -0.28,
+      amplitudeScale: 0.96,
+      color: accentB,
+      alpha: 0.66,
+      blur: 8,
+      width: 28
     });
 
     const edgePath = this.createEdgePath(shoreline, time, 0, 1);
 
     ctx.save();
+    ctx.clip(mainFill);
+
+    ctx.save();
     ctx.globalCompositeOperation = 'screen';
-    ctx.strokeStyle = hexToRgba(accentB, 0.24);
+    ctx.strokeStyle = hexToRgba(accentA, 0.20);
     ctx.lineWidth = this.profile.haloWidth;
+    ctx.shadowColor = accentA;
+    ctx.shadowBlur = this.profile.haloWidth * 0.72;
+    ctx.stroke(edgePath);
+    ctx.restore();
+
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    ctx.strokeStyle = hexToRgba(accentB, 0.78);
+    ctx.lineWidth = this.profile.glowWidth + 4.2;
     ctx.shadowColor = accentB;
-    ctx.shadowBlur = this.profile.haloWidth * 1.1;
+    ctx.shadowBlur = 8;
     ctx.stroke(edgePath);
     ctx.restore();
 
     ctx.save();
     ctx.globalCompositeOperation = 'screen';
-    ctx.strokeStyle = hexToRgba(glow, 0.76);
+    ctx.strokeStyle = hexToRgba(glow, 0.88);
     ctx.lineWidth = this.profile.glowWidth;
-    ctx.shadowColor = glow;
-    ctx.shadowBlur = 12;
-    ctx.stroke(edgePath);
-    ctx.restore();
-
-    ctx.save();
-    ctx.globalCompositeOperation = 'screen';
-    ctx.strokeStyle = hexToRgba('#FFFFFF', 0.92);
-    ctx.lineWidth = 1.35;
     ctx.shadowColor = glow;
     ctx.shadowBlur = 5;
     ctx.stroke(edgePath);
     ctx.restore();
 
-    const sheen = ctx.createLinearGradient(0, 0, 0, height);
-    sheen.addColorStop(0, 'rgba(255,255,255,0.12)');
-    sheen.addColorStop(0.28, 'rgba(255,255,255,0.015)');
-    sheen.addColorStop(1, 'rgba(0,0,0,0.10)');
-    ctx.fillStyle = sheen;
-    ctx.fillRect(0, 0, width, height);
+    ctx.restore();
+
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    ctx.strokeStyle = hexToRgba(glow, 0.84);
+    ctx.lineWidth = 2.15;
+    ctx.shadowColor = glow;
+    ctx.shadowBlur = 2.5;
+    ctx.stroke(edgePath);
+    ctx.restore();
+
+    if (this.profile.whiteAlpha > 0.05) {
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+      ctx.strokeStyle = `rgba(255,255,245,${this.profile.whiteAlpha})`;
+      ctx.lineWidth = this.profile.whiteWidth;
+      ctx.stroke(edgePath);
+      ctx.restore();
+    }
   }
 
   updateFromPointer(event) {
     const bounds = this.stage.getBoundingClientRect();
     const ratio = bounds.width > 0 ? (event.clientX - bounds.left) / bounds.width : 0;
     this.setProgress(ratio * 100);
-    this.completeUntil = 0;
+    this.targetValue = this.value;
     this.drawReferenceFlow();
   }
 
@@ -385,7 +404,7 @@ class ProgressCapsuleController {
     this.dragging = true;
     this.resumeAt = Number.POSITIVE_INFINITY;
     this.stage.classList.add('is-dragging');
-    this.stage.setPointerCapture?.(event.pointerId);
+    try { this.stage.setPointerCapture?.(event.pointerId); } catch {}
     this.updateFromPointer(event);
   }
 
@@ -399,10 +418,13 @@ class ProgressCapsuleController {
     if (!this.dragging) return;
     this.dragging = false;
     this.resumeAt = performance.now() + 1800;
+    this.nextTargetAt = this.resumeAt;
     this.stage.classList.remove('is-dragging');
-    if (event?.pointerId !== undefined && this.stage.hasPointerCapture?.(event.pointerId)) {
-      this.stage.releasePointerCapture(event.pointerId);
-    }
+    try {
+      if (event?.pointerId !== undefined && this.stage.hasPointerCapture?.(event.pointerId)) {
+        this.stage.releasePointerCapture(event.pointerId);
+      }
+    } catch {}
   }
 
   bindEvents() {
@@ -420,7 +442,6 @@ class ProgressCapsuleController {
         PageDown: -10,
         PageUp: 10
       };
-
       if (event.key === 'Home') {
         event.preventDefault();
         this.setProgress(0);
@@ -433,37 +454,38 @@ class ProgressCapsuleController {
       } else {
         return;
       }
-
+      this.targetValue = this.value;
       this.resumeAt = performance.now() + 1800;
-      this.completeUntil = 0;
+      this.nextTargetAt = this.resumeAt;
       this.drawReferenceFlow();
     });
+  }
+
+  chooseNextTarget(now) {
+    const [minValue, maxValue] = this.profile.autoRange;
+    this.targetValue = minValue + this.random() * (maxValue - minValue);
+    this.nextTargetAt = now + 650 + this.random() * 650;
   }
 
   update(delta, paused, now) {
     if (!paused) this.flowTime += delta;
 
     if (!paused && !this.dragging && now >= this.resumeAt) {
-      if (this.value >= 100) {
-        if (!this.completeUntil) this.completeUntil = now + 900;
-        if (now >= this.completeUntil) {
-          this.completeUntil = 0;
-          this.setProgress(8);
-        }
-      } else {
-        this.setProgress(this.value + this.preset.loadRate * delta);
-      }
+      if (!this.nextTargetAt || now >= this.nextTargetAt) this.chooseNextTarget(now);
+      const easing = 1 - Math.exp(-delta * 3.25);
+      this.setProgress(lerp(this.value, this.targetValue, easing));
     }
 
     this.drawReferenceFlow();
   }
 
   randomize() {
-    this.completeUntil = 0;
-    this.resumeAt = performance.now() + 600;
-    this.flowTime = Math.random() * 40;
-    this.noiseSeed = Math.random() * 100 + 3;
-    this.setProgress(18 + Math.random() * 68);
+    this.resumeAt = performance.now() + 500;
+    this.nextTargetAt = this.resumeAt;
+    this.flowTime = this.random() * 40;
+    const [minValue, maxValue] = this.profile.autoRange;
+    this.setProgress(minValue + this.random() * (maxValue - minValue));
+    this.targetValue = this.value;
     this.drawReferenceFlow();
   }
 }
@@ -504,12 +526,10 @@ function createProgressCard(preset) {
 
 export function createProgressCapsules({ grid, indexList }) {
   const controllers = [];
-
   for (const preset of PROGRESS_PRESETS) {
     const card = createProgressCard(preset);
     grid.append(card);
     controllers.push(new ProgressCapsuleController(card, preset));
-
     const item = document.createElement('li');
     item.textContent = `${preset.code} ${preset.name}`;
     indexList.append(item);
