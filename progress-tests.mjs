@@ -44,7 +44,12 @@ assert.match(rendererSource, /getContext\('webgl2'/);
 assert.match(rendererSource, /edgeDisplacement/);
 assert.match(rendererSource, /ellipseRing/);
 assert.match(rendererSource, /darkTrough/);
-assert.match(rendererSource, /rightCut/);
+assert.match(rendererSource, /microHarmonic/);
+assert.match(rendererSource, /31\.4159265/);
+assert.match(rendererSource, /47\.1238898/);
+assert.match(rendererSource, /modelMask/);
+assert.match(rendererSource, /profileMix\(0\.70, 0\.90, 0\.78\)/);
+assert.match(rendererSource, /rightCut = smoothstep\(0\.003, 0\.014, d\)/);
 assert.match(rendererSource, /ProgressFlowRenderer/);
 assert.match(rendererSource, /Canvas 2D 降级/);
 
@@ -61,4 +66,4 @@ assert.doesNotMatch(progressStyles, /\.progress-stage::after/);
 assert.match(progressStyles, /has-webgl-progress/);
 assert.match(progressStyles, /progress-webgl-overlay/);
 
-console.log('Progress WebGL reference comparison tests passed.');
+console.log('Progress WebGL reference calibration tests passed.');
