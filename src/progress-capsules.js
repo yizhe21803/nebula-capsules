@@ -1,6 +1,8 @@
 import { PROGRESS_PRESETS } from './progress-presets.js';
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+const lerp = (start, end, amount) => start + (end - start) * amount;
+const smoothstep = (value) => value * value * (3 - 2 * value);
 
 function hexToRgba(hex, alpha = 1) {
   const normalized = hex.replace('#', '');
@@ -11,10 +13,53 @@ function hexToRgba(hex, alpha = 1) {
   return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
 }
 
+function stringSeed(value) {
+  let hash = 2166136261;
+  for (const character of value) {
+    hash ^= character.charCodeAt(0);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0) / 4294967295;
+}
+
+const FLOW_PROFILES = {
+  'model-training': {
+    large: 11.8,
+    medium: 8.8,
+    fine: 5.0,
+    lobe: 5.2,
+    timeScale: 0.92,
+    detailScale: 1.12,
+    glowWidth: 5.0,
+    haloWidth: 18
+  },
+  'agent-migration': {
+    large: 14.2,
+    medium: 7.0,
+    fine: 2.8,
+    lobe: 6.4,
+    timeScale: 0.74,
+    detailScale: 0.78,
+    glowWidth: 4.2,
+    haloWidth: 22
+  },
+  'visual-training': {
+    large: 12.6,
+    medium: 8.4,
+    fine: 4.0,
+    lobe: 5.8,
+    timeScale: 0.84,
+    detailScale: 0.96,
+    glowWidth: 4.6,
+    haloWidth: 20
+  }
+};
+
 class ProgressCapsuleController {
   constructor(card, preset) {
     this.card = card;
     this.preset = preset;
+    this.profile = FLOW_PROFILES[preset.id] || FLOW_PROFILES['visual-training'];
     this.stage = card.querySelector('.progress-stage');
     this.canvas = card.querySelector('.progress-wave-canvas');
     this.context = this.canvas.getContext('2d');
@@ -23,7 +68,8 @@ class ProgressCapsuleController {
     this.dragging = false;
     this.resumeAt = 0;
     this.completeUntil = 0;
-    this.flowTime = Math.random() * 20;
+    this.flowTime = stringSeed(preset.id) * 37;
+    this.noiseSeed = stringSeed(`${preset.id}-flow`) * 97 + 3;
     this.dpr = 1;
     this.width = 0;
     this.height = 0;
@@ -55,36 +101,96 @@ class ProgressCapsuleController {
     this.canvas.style.width = `${this.width}px`;
     this.canvas.style.height = `${this.height}px`;
     this.context.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
-    this.drawBeachWaves();
+    this.drawReferenceFlow();
   }
 
-  createBoundaryPath(baseX, amplitude, frequency, phase, secondaryAmplitude = 0) {
-    const path = new Path2D();
-    const step = Math.max(3, this.height / 34);
-    path.moveTo(0, 0);
-    path.lineTo(baseX, 0);
+  hash2D(x, y, salt = 0) {
+    const value = Math.sin(
+      x * 127.1 + y * 311.7 + (this.noiseSeed + salt) * 74.7
+    ) * 43758.5453123;
+    return value - Math.floor(value);
+  }
 
-    for (let y = 0; y <= this.height + step; y += step) {
-      const primary = Math.sin(y * frequency + phase) * amplitude;
-      const secondary = Math.sin(y * frequency * 0.47 - phase * 1.38) * secondaryAmplitude;
-      const curl = Math.sin(y * frequency * 1.9 + phase * 0.62) * amplitude * 0.16;
-      path.lineTo(baseX + primary + secondary + curl, y);
+  valueNoise2D(x, y, salt = 0) {
+    const x0 = Math.floor(x);
+    const y0 = Math.floor(y);
+    const xf = x - x0;
+    const yf = y - y0;
+    const u = smoothstep(xf);
+    const v = smoothstep(yf);
+
+    const a = this.hash2D(x0, y0, salt);
+    const b = this.hash2D(x0 + 1, y0, salt);
+    const c = this.hash2D(x0, y0 + 1, salt);
+    const d = this.hash2D(x0 + 1, y0 + 1, salt);
+    return lerp(lerp(a, b, u), lerp(c, d, u), v);
+  }
+
+  fbm2D(x, y, salt = 0) {
+    let value = 0;
+    let amplitude = 0.56;
+    let frequency = 1;
+    let total = 0;
+
+    for (let octave = 0; octave < 4; octave += 1) {
+      value += this.valueNoise2D(
+        x * frequency + octave * 7.17,
+        y * frequency - octave * 5.31,
+        salt + octave * 13.9
+      ) * amplitude;
+      total += amplitude;
+      frequency *= 2.03;
+      amplitude *= 0.48;
     }
 
-    path.lineTo(0, this.height);
-    path.closePath();
-    return path;
+    return value / total;
   }
 
-  createFoamPath(baseX, amplitude, frequency, phase, secondaryAmplitude = 0) {
+  edgeEnvelope(yRatio) {
+    const top = smoothstep(clamp(yRatio / 0.12, 0, 1));
+    const bottom = smoothstep(clamp((1 - yRatio) / 0.12, 0, 1));
+    return Math.pow(top * bottom, 0.72);
+  }
+
+  edgeOffset(y, time, phase = 0, amplitudeScale = 1) {
+    const { large, medium, fine, lobe, timeScale, detailScale } = this.profile;
+    const yRatio = this.height > 0 ? y / this.height : 0;
+    const envelope = this.edgeEnvelope(yRatio);
+    const scaledTime = time * timeScale;
+
+    const broad = (this.fbm2D(
+      y * 0.0105 + this.noiseSeed * 0.03,
+      scaledTime * 0.105 + phase,
+      1.2
+    ) * 2 - 1) * large;
+
+    const middle = (this.fbm2D(
+      y * 0.026 * detailScale + this.noiseSeed * 0.07,
+      scaledTime * 0.22 - phase * 0.63,
+      5.8
+    ) * 2 - 1) * medium;
+
+    const detail = (this.fbm2D(
+      y * 0.070 * detailScale + this.noiseSeed * 0.11,
+      scaledTime * 0.43 + phase * 0.87,
+      11.3
+    ) * 2 - 1) * fine;
+
+    const localLobes = (this.valueNoise2D(
+      y * 0.018 + this.noiseSeed * 0.13,
+      scaledTime * 0.16 + 19.7 + phase,
+      18.4
+    ) * 2 - 1) * lobe;
+
+    return (broad + middle + detail + localLobes) * envelope * amplitudeScale;
+  }
+
+  createEdgePath(baseX, time, phase = 0, amplitudeScale = 1) {
     const path = new Path2D();
-    const step = Math.max(3, this.height / 38);
+    const step = Math.max(2, this.height / 64);
 
     for (let y = 0; y <= this.height + step; y += step) {
-      const primary = Math.sin(y * frequency + phase) * amplitude;
-      const secondary = Math.sin(y * frequency * 0.47 - phase * 1.38) * secondaryAmplitude;
-      const curl = Math.sin(y * frequency * 1.9 + phase * 0.62) * amplitude * 0.16;
-      const x = baseX + primary + secondary + curl;
+      const x = baseX + this.edgeOffset(y, time, phase, amplitudeScale);
       if (y === 0) path.moveTo(x, y);
       else path.lineTo(x, y);
     }
@@ -92,52 +198,93 @@ class ProgressCapsuleController {
     return path;
   }
 
-  drawWaveLayer({ baseX, amplitude, frequency, phase, colors, alpha, foamAlpha, blur }) {
-    const ctx = this.context;
-    const bodyPath = this.createBoundaryPath(baseX, amplitude, frequency, phase, amplitude * 0.34);
-    const foamPath = this.createFoamPath(baseX, amplitude, frequency, phase, amplitude * 0.34);
+  createFillPath(baseX, time, phase = 0, amplitudeScale = 1) {
+    const path = new Path2D();
+    const step = Math.max(2, this.height / 64);
+    path.moveTo(0, 0);
+    path.lineTo(baseX + this.edgeOffset(0, time, phase, amplitudeScale), 0);
 
-    const gradient = ctx.createLinearGradient(0, 0, Math.max(baseX + amplitude * 2, 1), 0);
-    gradient.addColorStop(0, colors[0]);
-    gradient.addColorStop(0.52, colors[1]);
-    gradient.addColorStop(0.84, colors[2]);
-    gradient.addColorStop(1, colors[3]);
+    for (let y = step; y <= this.height + step; y += step) {
+      path.lineTo(
+        baseX + this.edgeOffset(y, time, phase, amplitudeScale),
+        y
+      );
+    }
 
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.shadowColor = colors[3];
-    ctx.shadowBlur = blur;
-    ctx.fillStyle = gradient;
-    ctx.fill(bodyPath);
-    ctx.restore();
-
-    ctx.save();
-    ctx.globalCompositeOperation = 'screen';
-    ctx.globalAlpha = foamAlpha;
-    ctx.strokeStyle = hexToRgba('#FFFFFF', 0.95);
-    ctx.lineWidth = Math.max(1.2, this.height * 0.013);
-    ctx.shadowColor = colors[3];
-    ctx.shadowBlur = Math.max(8, this.height * 0.12);
-    ctx.stroke(foamPath);
-    ctx.restore();
+    path.lineTo(0, this.height);
+    path.closePath();
+    return path;
   }
 
-  drawSwashGlow(centerX, centerY, radiusX, radiusY, color, alpha) {
+  drawEllipticalGlow(x, y, radiusX, radiusY, color, alpha) {
     const ctx = this.context;
     ctx.save();
-    ctx.translate(centerX, centerY);
+    ctx.translate(x, y);
     ctx.scale(1, radiusY / radiusX);
-    const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, radiusX);
-    glow.addColorStop(0, hexToRgba(color, alpha));
-    glow.addColorStop(0.52, hexToRgba(color, alpha * 0.34));
-    glow.addColorStop(1, hexToRgba(color, 0));
+    const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, radiusX);
+    gradient.addColorStop(0, hexToRgba(color, alpha));
+    gradient.addColorStop(0.48, hexToRgba(color, alpha * 0.38));
+    gradient.addColorStop(1, hexToRgba(color, 0));
     ctx.globalCompositeOperation = 'screen';
-    ctx.fillStyle = glow;
+    ctx.fillStyle = gradient;
     ctx.fillRect(-radiusX, -radiusX, radiusX * 2, radiusX * 2);
     ctx.restore();
   }
 
-  drawBeachWaves() {
+  drawColorClouds(shoreline, time, accentA, accentB, glow) {
+    const slowTime = time * this.profile.timeScale;
+    const cloudData = [
+      {
+        y: this.height * (0.26 + this.valueNoise2D(slowTime * 0.07, 2.1, 31) * 0.18),
+        x: shoreline - this.width * 0.095,
+        rx: Math.max(58, this.width * 0.16),
+        ry: this.height * 0.54,
+        color: accentA,
+        alpha: 0.34
+      },
+      {
+        y: this.height * (0.66 + (this.valueNoise2D(slowTime * 0.06, 6.7, 44) - 0.5) * 0.28),
+        x: shoreline - this.width * 0.065,
+        rx: Math.max(48, this.width * 0.13),
+        ry: this.height * 0.46,
+        color: accentB,
+        alpha: 0.30
+      },
+      {
+        y: this.height * (0.46 + (this.valueNoise2D(slowTime * 0.09, 10.2, 58) - 0.5) * 0.34),
+        x: shoreline - this.width * 0.025,
+        rx: Math.max(34, this.width * 0.085),
+        ry: this.height * 0.34,
+        color: glow,
+        alpha: 0.18
+      }
+    ];
+
+    for (const cloud of cloudData) {
+      this.drawEllipticalGlow(
+        cloud.x,
+        cloud.y,
+        cloud.rx,
+        cloud.ry,
+        cloud.color,
+        cloud.alpha
+      );
+    }
+  }
+
+  drawBlurredLayer({ baseX, time, phase, amplitudeScale, color, alpha, blur }) {
+    const ctx = this.context;
+    const path = this.createFillPath(baseX, time, phase, amplitudeScale);
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    ctx.globalAlpha = alpha;
+    ctx.filter = `blur(${blur}px)`;
+    ctx.fillStyle = color;
+    ctx.fill(path);
+    ctx.restore();
+  }
+
+  drawReferenceFlow() {
     if (!this.context || this.width <= 0 || this.height <= 0) return;
 
     const ctx = this.context;
@@ -150,106 +297,77 @@ class ProgressCapsuleController {
     ctx.clearRect(0, 0, width, height);
 
     const background = ctx.createLinearGradient(0, 0, width, 0);
-    background.addColorStop(0, '#17191F');
-    background.addColorStop(0.62, '#22242A');
-    background.addColorStop(1, '#2B2C31');
+    background.addColorStop(0, '#17171D');
+    background.addColorStop(0.56, '#202126');
+    background.addColorStop(1, '#242529');
     ctx.fillStyle = background;
     ctx.fillRect(0, 0, width, height);
 
-    const ambient = ctx.createRadialGradient(
-      shoreline,
-      height * 0.5,
-      0,
-      shoreline,
-      height * 0.5,
-      Math.max(width * 0.3, height * 1.4)
-    );
-    ambient.addColorStop(0, hexToRgba(accentB, 0.18));
-    ambient.addColorStop(0.5, hexToRgba(accentA, 0.08));
-    ambient.addColorStop(1, hexToRgba(dark, 0));
-    ctx.fillStyle = ambient;
-    ctx.fillRect(0, 0, width, height);
+    const mainFill = this.createFillPath(shoreline, time, 0, 1);
+    const bodyGradient = ctx.createLinearGradient(0, 0, Math.max(shoreline + 20, 1), 0);
+    bodyGradient.addColorStop(0, dark);
+    bodyGradient.addColorStop(0.42, hexToRgba(dark, 0.98));
+    bodyGradient.addColorStop(0.68, hexToRgba(accentA, 0.32));
+    bodyGradient.addColorStop(0.88, hexToRgba(accentB, 0.72));
+    bodyGradient.addColorStop(1, hexToRgba(glow, 0.82));
+    ctx.fillStyle = bodyGradient;
+    ctx.fill(mainFill);
 
-    this.drawWaveLayer({
-      baseX: shoreline + 24,
-      amplitude: height * 0.12,
-      frequency: 0.052,
-      phase: time * 0.82 + 0.8,
-      colors: [dark, accentA, accentB, glow],
-      alpha: 0.42,
-      foamAlpha: 0.18,
-      blur: height * 0.08
+    this.drawColorClouds(shoreline, time, accentA, accentB, glow);
+
+    this.drawBlurredLayer({
+      baseX: shoreline - 64,
+      time,
+      phase: 7.8,
+      amplitudeScale: 0.76,
+      color: accentA,
+      alpha: 0.22,
+      blur: 20
+    });
+    this.drawBlurredLayer({
+      baseX: shoreline - 34,
+      time,
+      phase: -4.1,
+      amplitudeScale: 0.86,
+      color: accentB,
+      alpha: 0.30,
+      blur: 13
     });
 
-    this.drawWaveLayer({
-      baseX: shoreline + 8,
-      amplitude: height * 0.16,
-      frequency: 0.066,
-      phase: -time * 1.12 + 2.2,
-      colors: [dark, accentB, accentA, glow],
-      alpha: 0.58,
-      foamAlpha: 0.31,
-      blur: height * 0.10
-    });
-
-    this.drawWaveLayer({
-      baseX: shoreline - 8,
-      amplitude: height * 0.20,
-      frequency: 0.083,
-      phase: time * 1.46 + 4.1,
-      colors: [dark, accentA, accentB, glow],
-      alpha: 0.88,
-      foamAlpha: 0.68,
-      blur: height * 0.15
-    });
-
-    const driftA = Math.sin(time * 0.74) * height * 0.20;
-    const driftB = Math.cos(time * 0.57 + 1.4) * height * 0.24;
-    this.drawSwashGlow(
-      shoreline - width * 0.07,
-      height * 0.35 + driftA,
-      Math.max(54, width * 0.16),
-      height * 0.62,
-      accentB,
-      0.34
-    );
-    this.drawSwashGlow(
-      shoreline - width * 0.03,
-      height * 0.68 + driftB,
-      Math.max(48, width * 0.13),
-      height * 0.50,
-      glow,
-      0.24
-    );
+    const edgePath = this.createEdgePath(shoreline, time, 0, 1);
 
     ctx.save();
     ctx.globalCompositeOperation = 'screen';
-    ctx.globalAlpha = 0.22;
-    ctx.strokeStyle = hexToRgba('#FFFFFF', 0.72);
-    ctx.lineWidth = 1;
-
-    for (let index = 0; index < 3; index += 1) {
-      const offset = (index - 1) * height * 0.24;
-      const y = height * 0.5 + offset + Math.sin(time * (0.72 + index * 0.16)) * height * 0.06;
-      ctx.beginPath();
-      ctx.moveTo(Math.max(0, shoreline - width * 0.36), y);
-      ctx.bezierCurveTo(
-        shoreline - width * 0.24,
-        y - height * 0.11,
-        shoreline - width * 0.12,
-        y + height * 0.12,
-        shoreline + height * 0.04,
-        y - height * 0.02
-      );
-      ctx.stroke();
-    }
+    ctx.strokeStyle = hexToRgba(accentB, 0.24);
+    ctx.lineWidth = this.profile.haloWidth;
+    ctx.shadowColor = accentB;
+    ctx.shadowBlur = this.profile.haloWidth * 1.1;
+    ctx.stroke(edgePath);
     ctx.restore();
 
-    const gloss = ctx.createLinearGradient(0, 0, 0, height);
-    gloss.addColorStop(0, 'rgba(255,255,255,0.16)');
-    gloss.addColorStop(0.34, 'rgba(255,255,255,0.02)');
-    gloss.addColorStop(1, 'rgba(0,0,0,0.12)');
-    ctx.fillStyle = gloss;
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    ctx.strokeStyle = hexToRgba(glow, 0.76);
+    ctx.lineWidth = this.profile.glowWidth;
+    ctx.shadowColor = glow;
+    ctx.shadowBlur = 12;
+    ctx.stroke(edgePath);
+    ctx.restore();
+
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    ctx.strokeStyle = hexToRgba('#FFFFFF', 0.92);
+    ctx.lineWidth = 1.35;
+    ctx.shadowColor = glow;
+    ctx.shadowBlur = 5;
+    ctx.stroke(edgePath);
+    ctx.restore();
+
+    const sheen = ctx.createLinearGradient(0, 0, 0, height);
+    sheen.addColorStop(0, 'rgba(255,255,255,0.12)');
+    sheen.addColorStop(0.28, 'rgba(255,255,255,0.015)');
+    sheen.addColorStop(1, 'rgba(0,0,0,0.10)');
+    ctx.fillStyle = sheen;
     ctx.fillRect(0, 0, width, height);
   }
 
@@ -258,7 +376,7 @@ class ProgressCapsuleController {
     const ratio = bounds.width > 0 ? (event.clientX - bounds.left) / bounds.width : 0;
     this.setProgress(ratio * 100);
     this.completeUntil = 0;
-    this.drawBeachWaves();
+    this.drawReferenceFlow();
   }
 
   beginDrag(event) {
@@ -318,14 +436,12 @@ class ProgressCapsuleController {
 
       this.resumeAt = performance.now() + 1800;
       this.completeUntil = 0;
-      this.drawBeachWaves();
+      this.drawReferenceFlow();
     });
   }
 
   update(delta, paused, now) {
-    if (!paused) {
-      this.flowTime += delta;
-    }
+    if (!paused) this.flowTime += delta;
 
     if (!paused && !this.dragging && now >= this.resumeAt) {
       if (this.value >= 100) {
@@ -339,15 +455,16 @@ class ProgressCapsuleController {
       }
     }
 
-    this.drawBeachWaves();
+    this.drawReferenceFlow();
   }
 
   randomize() {
     this.completeUntil = 0;
     this.resumeAt = performance.now() + 600;
-    this.flowTime = Math.random() * 20;
+    this.flowTime = Math.random() * 40;
+    this.noiseSeed = Math.random() * 100 + 3;
     this.setProgress(18 + Math.random() * 68);
-    this.drawBeachWaves();
+    this.drawReferenceFlow();
   }
 }
 
