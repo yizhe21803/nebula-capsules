@@ -24,6 +24,8 @@ const entrySource = await readFile(new URL('./src/progress-entry.js', import.met
 assert.match(entrySource, /LEGACY_CAPSULE_COUNT = 9/);
 assert.match(entrySource, /requestAnimationFrame\(mountProgressCapsules\)/);
 assert.match(entrySource, /grid\.dataset\.progressMounted/);
+assert.match(entrySource, /createProgressFlowOverlays/);
+assert.match(entrySource, /flowOverlays\.update/);
 
 const moduleSource = await readFile(new URL('./src/progress-capsules.js', import.meta.url), 'utf8');
 assert.match(moduleSource, /FLOW_PROFILES/);
@@ -37,10 +39,26 @@ assert.match(moduleSource, /pointerdown/);
 assert.match(moduleSource, /performance\.now\(\) \+ 1800/);
 assert.doesNotMatch(moduleSource, /this\.value \+ this\.preset\.loadRate \* delta/);
 
+const rendererSource = await readFile(new URL('./src/progress-flow-renderer.js', import.meta.url), 'utf8');
+assert.match(rendererSource, /getContext\('webgl2'/);
+assert.match(rendererSource, /edgeDisplacement/);
+assert.match(rendererSource, /ellipseRing/);
+assert.match(rendererSource, /darkTrough/);
+assert.match(rendererSource, /rightCut/);
+assert.match(rendererSource, /ProgressFlowRenderer/);
+assert.match(rendererSource, /Canvas 2D 降级/);
+
+const overlaySource = await readFile(new URL('./src/progress-flow-overlays.js', import.meta.url), 'utf8');
+assert.match(overlaySource, /createProgressFlowOverlays/);
+assert.match(overlaySource, /progress-webgl-overlay/);
+assert.match(overlaySource, /getPropertyValue\('--progress'\)/);
+
 const progressStyles = await readFile(new URL('./progress.css', import.meta.url), 'utf8');
 assert.match(progressStyles, /grid-template-columns:\s*repeat\(4/);
 assert.match(progressStyles, /touch-action:\s*none/);
 assert.match(progressStyles, /cursor:\s*ew-resize/);
 assert.doesNotMatch(progressStyles, /\.progress-stage::after/);
+assert.match(progressStyles, /has-webgl-progress/);
+assert.match(progressStyles, /progress-webgl-overlay/);
 
-console.log('Progress reference comparison tests passed.');
+console.log('Progress WebGL reference comparison tests passed.');
