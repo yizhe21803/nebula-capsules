@@ -41,11 +41,19 @@
   height: 100%;
   border-radius: inherit;
   pointer-events: none;
-  transition: filter 180ms ease;
+  transition: filter 180ms ease, opacity 160ms ease;
 }
 
 .progress-stage.is-dragging .progress-wave-canvas {
   filter: saturate(1.15) brightness(1.08);
+}
+
+.progress-stage.has-webgl-progress > .progress-wave-canvas:not(.progress-webgl-overlay) {
+  opacity: 0;
+}
+
+.progress-webgl-overlay {
+  z-index: 2;
 }
 
 .progress-copy {
