@@ -99,9 +99,9 @@ float edgeDisplacement(float y, float t) {
   float middleScale = profileMix(4.15, 2.35, 3.45);
   float detailScale = profileMix(7.60, 4.40, 6.10);
 
-  float broadAmp = profileMix(0.0165, 0.0215, 0.0200);
-  float middleAmp = profileMix(0.0110, 0.0042, 0.0060);
-  float detailAmp = profileMix(0.0045, 0.0010, 0.0015);
+  float broadAmp = profileMix(0.0158, 0.0208, 0.0218);
+  float middleAmp = profileMix(0.0128, 0.0038, 0.0068);
+  float detailAmp = profileMix(0.0062, 0.0008, 0.0012);
 
   float broad = (fbm(vec2(y * broadScale + u_seed * 0.7, time * 0.095)) * 2.0 - 1.0) * broadAmp;
   float middle = (fbm(vec2(y * middleScale + 7.3 + u_seed, -time * 0.17)) * 2.0 - 1.0) * middleAmp;
@@ -109,23 +109,28 @@ float edgeDisplacement(float y, float t) {
 
   float lobeCenterA = 0.27 + sin(time * 0.29 + u_seed * 3.0) * 0.14;
   float lobeCenterB = 0.70 + cos(time * 0.25 + u_seed * 4.7) * 0.14;
-  float lobeWidth = profileMix(0.065, 0.125, 0.085);
-  float lobeAmp = profileMix(0.0165, 0.0180, 0.0170);
+  float lobeWidth = profileMix(0.056, 0.130, 0.078);
+  float lobeAmp = profileMix(0.0145, 0.0175, 0.0205);
   float lobes = gaussian(y, lobeCenterA, lobeWidth) * sin(time * 1.09 + u_seed * 6.0) * lobeAmp;
   lobes -= gaussian(y, lobeCenterB, lobeWidth * 1.08) * cos(time * 0.96 + u_seed * 5.0) * lobeAmp;
 
   float activity = profileMix(
-    0.30 + 0.70 * (0.5 + 0.5 * sin(time * 0.43 + u_seed * 1.2)),
-    0.58 + 0.42 * (0.5 + 0.5 * sin(time * 0.24 + u_seed * 1.7)),
-    0.44 + 0.56 * (0.5 + 0.5 * cos(time * 0.31 + u_seed * 1.4))
+    0.68 + 0.32 * (0.5 + 0.5 * sin(time * 0.43 + u_seed * 1.2)),
+    0.62 + 0.38 * (0.5 + 0.5 * sin(time * 0.24 + u_seed * 1.7)),
+    0.58 + 0.42 * (0.5 + 0.5 * cos(time * 0.31 + u_seed * 1.4))
   );
   float harmonic = profileMix(
-    sin(y * 18.8495559 + time * 0.78 + u_seed * 2.1) * 0.0115,
-    sin(y * 5.6548668 - time * 0.43 + u_seed * 1.8) * 0.0080,
-    sin(y * 9.7389372 + time * 0.55 + u_seed * 2.4) * 0.0125
+    sin(y * 31.4159265 + time * 0.82 + u_seed * 2.1) * 0.0138,
+    sin(y * 6.2831853 - time * 0.43 + u_seed * 1.8) * 0.0065,
+    sin(y * 12.5663706 + time * 0.58 + u_seed * 2.4) * 0.0140
+  ) * activity;
+  float microHarmonic = profileMix(
+    sin(y * 47.1238898 - time * 1.16 + u_seed * 3.7) * 0.0048,
+    0.0,
+    sin(y * 18.8495559 - time * 0.71 + u_seed * 3.1) * 0.0032
   ) * activity;
 
-  return (broad + middle + detail + lobes + harmonic) * envelope;
+  return (broad + middle + detail + lobes + harmonic + microHarmonic) * envelope;
 }
 
 float ellipseRing(vec2 p, float radius, float width) {
@@ -142,7 +147,7 @@ void main() {
   vec3 color = rightBase;
 
   float leftMask = 1.0 - smoothstep(-0.001, 0.002, d);
-  color = mix(color, u_dark, leftMask * 0.96);
+  color = mix(color, u_dark, leftMask * profileMix(0.70, 0.90, 0.78));
 
   vec2 flowP = vec2((d + 0.13) * 5.2, uv.y * 1.85);
   float flowA = fbm(flowP + vec2(-t * 0.080, t * 0.10) + u_seed * 1.7);
@@ -159,38 +164,40 @@ void main() {
   float darkTrough = gaussian(d, -0.060 + (flowB - 0.5) * 0.014, profileMix(0.027, 0.031, 0.029));
 
   float ringY = 0.47 + sin(t * 0.22 + u_seed * 2.4) * 0.11;
-  vec2 ringP = vec2((d + 0.135) / 0.125, (uv.y - ringY) / 0.31);
-  ringP += vec2((flowB - 0.5) * 0.16, (flowA - 0.5) * 0.11);
-  float ring = ellipseRing(ringP, 0.72, 0.22);
-  float ringCore = gaussian(length(ringP), 0.28, 0.27);
-  float ringPulse = 0.48 + 0.52 * sin(t * 0.46 + u_seed * 4.1) * 0.5 + 0.26;
+  vec2 ringP = vec2((d + 0.118) / 0.105, (uv.y - ringY) / 0.28);
+  ringP += vec2((flowB - 0.5) * 0.11, (flowA - 0.5) * 0.08);
+  float ring = ellipseRing(ringP, 0.64, 0.17);
+  float ringCore = gaussian(length(ringP), 0.24, 0.22);
+  float ringPulse = 0.62 + 0.38 * (0.5 + 0.5 * sin(t * 0.46 + u_seed * 4.1));
   float modelRing = ring * ringPulse * (1.0 - step(0.5, u_profile));
-  float visualRing = ring * 0.34 * step(1.5, u_profile);
+  float visualRing = ring * 0.22 * step(1.5, u_profile);
 
   float cloudGate = leftMask * smoothstep(-0.30, -0.008, d);
   float textureA = smoothstep(0.24, 0.92, flowA * 0.72 + flowB * 0.42);
   float textureB = smoothstep(0.28, 0.94, flowB * 0.68 + flowC * 0.38);
 
-  color += u_accentA * farBand * cloudGate * (0.17 + textureA * profileMix(0.72, 0.48, 0.60));
-  color += u_accentB * midBand * cloudGate * (0.24 + textureB * profileMix(0.74, 0.66, 0.69));
-  color += u_glow * hotBand * cloudGate * profileMix(0.58, 0.42, 0.49);
-  color += u_accentA * (modelRing + visualRing) * cloudGate * profileMix(0.88, 0.0, 0.55);
-  color *= 1.0 - (darkTrough * profileMix(0.74, 0.58, 0.66) + ringCore * modelRing * 0.70) * cloudGate;
+  color += u_accentA * farBand * cloudGate * (0.13 + textureA * profileMix(0.50, 0.42, 0.42));
+  color += u_accentB * midBand * cloudGate * (0.19 + textureB * profileMix(0.58, 0.56, 0.52));
+  color += u_glow * hotBand * cloudGate * profileMix(0.48, 0.34, 0.38);
+  float modelMask = 1.0 - step(0.5, u_profile);
+  color += u_accentA * (modelRing + visualRing) * cloudGate * profileMix(0.82, 0.0, 0.36);
+  color *= 1.0 - darkTrough * profileMix(0.82, 0.66, 0.72) * cloudGate;
+  color *= 1.0 - ringCore * modelMask * 0.54 * cloudGate;
 
-  float broadHalo = exp(-abs(d) * 58.0);
-  float innerHalo = exp(-abs(d) * 110.0);
-  float colorCore = exp(-abs(d) * 225.0);
-  float sharpCore = exp(-abs(d) * 470.0);
-  float leftGate = 1.0 - smoothstep(-0.003, 0.009, d);
+  float broadHalo = exp(-abs(d) * 72.0);
+  float innerHalo = exp(-abs(d) * 138.0);
+  float colorCore = exp(-abs(d) * 270.0);
+  float sharpCore = exp(-abs(d) * 560.0);
+  float leftGate = 1.0 - smoothstep(-0.003, 0.007, d);
 
-  color += u_accentA * broadHalo * leftGate * profileMix(0.28, 0.18, 0.22);
-  color += u_accentB * innerHalo * leftGate * profileMix(0.92, 0.88, 0.82);
-  color += u_glow * colorCore * profileMix(1.02, 0.86, 0.92);
+  color += u_accentA * broadHalo * leftGate * profileMix(0.22, 0.11, 0.16);
+  color += u_accentB * innerHalo * leftGate * profileMix(0.80, 0.68, 0.68);
+  color += u_glow * colorCore * profileMix(0.94, 0.72, 0.78);
 
-  float whiteStrength = profileMix(0.72, 0.11, 0.25);
+  float whiteStrength = profileMix(0.58, 0.06, 0.14);
   color += vec3(1.0, 0.99, 0.91) * sharpCore * whiteStrength;
 
-  float rightCut = smoothstep(0.006, 0.020, d);
+  float rightCut = smoothstep(0.003, 0.014, d);
   color = mix(color, rightBase, rightCut);
 
   outColor = vec4(clamp(color, 0.0, 1.0), 1.0);
