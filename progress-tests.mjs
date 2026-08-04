@@ -37,10 +37,21 @@ assert.match(moduleSource, /pointerdown/);
 assert.match(moduleSource, /pointermove/);
 assert.match(moduleSource, /loadRate \* delta/);
 assert.match(moduleSource, /performance\.now\(\) \+ 1800/);
+assert.match(moduleSource, /progress-wave-canvas/);
+assert.match(moduleSource, /drawBeachWaves/);
+assert.match(moduleSource, /drawWaveLayer/);
+assert.match(moduleSource, /createBoundaryPath/);
+assert.match(moduleSource, /createFoamPath/);
+assert.match(moduleSource, /Math\.sin/);
+assert.match(moduleSource, /globalCompositeOperation = 'screen'/);
+assert.match(moduleSource, /ResizeObserver/);
 
 const progressStyles = await readFile(new URL('./progress.css', import.meta.url), 'utf8');
 assert.match(progressStyles, /grid-template-columns:\s*repeat\(4/);
 assert.match(progressStyles, /touch-action:\s*none/);
 assert.match(progressStyles, /cursor:\s*ew-resize/);
+assert.match(progressStyles, /\.progress-wave-canvas/);
+assert.doesNotMatch(progressStyles, /\.progress-interface/);
+assert.doesNotMatch(progressStyles, /clip-path:/);
 
-console.log('Progress capsule isolation tests passed.');
+console.log('Progress capsule beach-wave isolation tests passed.');
