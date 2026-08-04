@@ -16,27 +16,15 @@
   display: block;
   height: clamp(126px, 11vw, 148px);
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.34);
   border-radius: 999px;
   color: #fff;
-  background: #222326;
-  box-shadow: 0 16px 42px rgba(32, 35, 31, 0.09), 0 3px 10px rgba(32, 35, 31, 0.05);
+  background: #202126;
+  box-shadow: 0 12px 30px rgba(20, 20, 24, 0.10);
   cursor: ew-resize;
   touch-action: none;
   user-select: none;
   isolation: isolate;
-}
-
-.progress-stage::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  border-radius: inherit;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.14), transparent 34%, rgba(0, 0, 0, 0.08)),
-    radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.08), transparent 34%);
-  pointer-events: none;
 }
 
 .progress-stage:focus-visible {
