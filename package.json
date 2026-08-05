@@ -3,11 +3,11 @@
   "version": "1.6.0",
   "private": false,
   "type": "module",
-  "description": "画境观屿：NC-01～NC-09 原有胶囊保持冻结；NC-10～NC-12 使用原视频边界轨迹、内嵌参考纹理图集、单向中高速加载和 454×104px 品牌窄幅布局。",
+  "description": "画境观屿：NC-01～NC-09 原有胶囊保持冻结；NC-10～NC-12 使用平滑边界轨迹、运行时参考纹理、单向中高速加载和 454×104px 品牌窄幅布局。",
   "scripts": {
     "start": "node scripts/serve.mjs",
     "dev": "node scripts/serve.mjs",
-    "check": "node --check src/main.js && node --check src/cosmic-shader.js && node --check src/fallback.js && node --check src/presets.js && node --check src/progress-presets.js && node --check src/progress-capsules.js && node --check src/progress-motion-model.js && node --check src/progress-motion-agent.js && node --check src/progress-motion-visual.js && node --check src/progress-motion-data.js && node --check src/progress-reference-atlas-model-0.js && node --check src/progress-reference-atlas-model-1.js && node --check src/progress-reference-atlas-model-2.js && node --check src/progress-reference-atlas-agent-0.js && node --check src/progress-reference-atlas-agent-1.js && node --check src/progress-reference-atlas-agent-2.js && node --check src/progress-reference-atlas-visual-0.js && node --check src/progress-reference-atlas-visual-1.js && node --check src/progress-reference-atlas-visual-2.js && node --check src/progress-reference-atlases.js && node --check src/progress-flow-renderer.js && node --check src/progress-flow-overlays.js && node --check src/progress-entry.js && node --check scripts/serve.mjs",
+    "check": "node --check src/main.js && node --check src/cosmic-shader.js && node --check src/fallback.js && node --check src/presets.js && node --check src/progress-presets.js && node --check src/progress-capsules.js && node --check src/progress-motion-data.js && node --check src/progress-reference-atlases.js && node --check src/progress-flow-renderer.js && node --check src/progress-flow-overlays.js && node --check src/progress-entry.js && node --check scripts/serve.mjs",
     "test": "node tests.mjs && node progress-tests.mjs"
   },
   "license": "MIT",
