@@ -2,18 +2,60 @@
 
 [中文说明](README.md)
 
-Nine realtime generative capsules: **Original, Ocean, Klein, Ultraviolet, Chrome, Plus, Polar, Dubdot, and Vercel**.
+Current version: **project 1.6.0 / NC-10–NC-12 visual version v2.4.7**.
 
-- `NC-01 ~ NC-06`: cosmic nebula fluid mode
-- `NC-07 POLAR`: dark capsule with orange, magenta, and warm-white light ribbons; no dark outer outline
+The project contains twelve realtime animated capsules across three rendering modes: Nebula, Aurora, and Progress.
+
+## Capsule list
+
+### Nebula
+
+- `NC-01 ORIGINAL`
+- `NC-02 OCEAN`
+- `NC-03 KLEIN`
+- `NC-04 ULTRAVIOLET`
+- `NC-05 CHROME`
+- `NC-06 PLUS`
+
+These presets use layered noise, stars, clouds, and swirls to form cosmic-nebula materials.
+
+### Aurora
+
+- `NC-07 POLAR`: dark capsule with orange, magenta, and warm-white light ribbons
 - `NC-08 DUBDOT`: white capsule with pale blue, sky blue, and cyan light ribbons
 - `NC-09 VERCEL`: white capsule with mint, soft yellow, and pale pink light ribbons
 
-The three new styles are appended in the exact reference-image order and use dedicated `aurora` motion profiles. All three are rendered inside the WebGL2 fluid pipeline, with Canvas 2D fallback when WebGL2 is unavailable. The page continues to support autoplay, pointer/touch gravity, pause controls, randomization, cool/warm filtering, and an immersive viewer.
+All three use internal WebGL2 ribbon rendering, with automatic Canvas 2D fallback when WebGL2 is unavailable.
 
-![Huajing Guanyu nine-capsule preview](assets/preview-v2.0.4.png)
+### Progress
 
-## One-click launchers (recommended)
+- `NC-10 MODEL TRAINING`
+- `NC-11 AGENT MIGRATION`
+- `NC-12 VISUAL TRAINING`
+
+Selecting **Progress** in the filter bar displays the three progress capsules in a centered, single-column layout with one capsule per row.
+
+Current visual and interaction specification:
+
+- Fixed desktop size: `454 × 104px`
+- The capsules no longer stretch when the page grows; they shrink only when the viewport is too narrow
+- The internal primary title is the brand name **“画境观屿”**
+- Automatic progress moves forward only, at a constant linear rate, with no rollback or random jumps
+- `NC-10`: `1.10% per second`
+- `NC-11`: `1.00% per second`
+- `NC-12`: `1.05% per second`
+- Progress remains at `100%` and does not automatically reset
+- Mouse, touch, and keyboard progress adjustment are supported
+- After manual adjustment, automatic forward loading resumes after about `1.8 seconds`
+- Shuffle changes only the fluid texture phase and does not change the percentage
+- A `240 × 80` smooth motion field and a 24-frame runtime texture atlas reduce fine-grained jitter
+- Canvas 2D fallback remains available when WebGL2 is unavailable
+
+> `NC-01–NC-09` remain frozen modules. Progress updates do not modify `src/main.js`, `src/presets.js`, `src/cosmic-shader.js`, `src/fallback.js`, or `aurora.css`.
+
+![NC-01–NC-09 preview](assets/preview-v2.0.4.png)
+
+## One-click launchers
 
 Node.js 18 or newer is required.
 
@@ -40,30 +82,36 @@ If the port is occupied, the server automatically tries later ports. The project
 
 ## Controls
 
-- **Autoplay**: all nine capsules start moving after the page loads.
-- **Shuffle**: regenerates shape parameters for every capsule.
-- **Pause / Continue**: freezes or resumes all visible animations.
-- **All / Cool / Warm**: filters capsules by palette group.
-- **Click a capsule**: opens the corresponding full-screen viewer.
-- **Move or touch**: temporarily changes the gravity direction of the nebula or light ribbons.
+- **Autoplay**: visible animations start immediately after the page loads
+- **Shuffle**: regenerates the original capsule shapes; progress capsules only change fluid texture phase
+- **Pause / Continue**: freezes or resumes all visible motion and automatic progress
+- **All / Cool / Warm / Progress**: filters by palette and capsule type
+- **Click an original capsule**: opens its immersive preview
+- **Drag a progress capsule**: directly changes the current percentage
+- **Keyboard progress controls**: arrow keys adjust by 2%, Page Up / Page Down by 10%, and Home / End jump to 0% / 100%
 
-## Rendering modes
+## Rendering architecture
 
 ### Nebula
 
-The original six presets use layered noise, stars, clouds, and swirls to form cosmic-fluid materials.
+`NC-01–NC-06` use `src/cosmic-shader.js` for WebGL2 nebula rendering, with `src/fallback.js` as the Canvas 2D fallback.
 
 ### Aurora
 
-The three new presets use low-frequency noise and multiple light ribbons to create smoothly moving gradients:
+`NC-07–NC-09` use dedicated Aurora parameters and `aurora.css` theme overrides, without external video or CSS sweep layers.
 
-```text
-NC-07 POLAR
-NC-08 DUBDOT
-NC-09 VERCEL
-```
+### Progress
 
-`POLAR` uses a dark text area without an outer outline. `DUBDOT` and `VERCEL` keep white capsule bases. All three use the same WebGL / Canvas internal ribbon-rendering standard, with no separate CSS sweep or cloud animation layers.
+`NC-10–NC-12` are connected through independent incremental modules and do not intrude into the original nine-capsule rendering path:
+
+- `src/progress-presets.js`: codes, palettes, initial values, and loading rates
+- `src/progress-capsules.js`: components, dragging, keyboard controls, and forward-only progress logic
+- `src/progress-motion-data.js`: smooth boundary motion-field generation
+- `src/progress-reference-atlases.js`: runtime reference texture atlases
+- `src/progress-flow-renderer.js`: WebGL2 fluid and boundary rendering
+- `src/progress-flow-overlays.js`: WebGL overlay and Canvas fallback switching
+- `src/progress-entry.js`: mounts progress capsules after the original nine have loaded
+- `progress.css`: Progress filter, fixed sizing, and responsive layout
 
 ## Development and verification
 
@@ -72,19 +120,30 @@ npm run check
 npm test
 ```
 
+`npm test` verifies:
+
+- The `NC-01–NC-09` ordering and frozen module boundary remain untouched
+- `NC-10–NC-12` loading rates and forward-only logic
+- The internal brand title “画境观屿”
+- The fixed `454 × 104px` narrow layout
+- WebGL2, runtime texture, and Canvas 2D fallback entry points
+
 ## Main files
 
 ```text
-index.html              Page structure
-styles.css              Existing page and component styles
-aurora.css              Aurora capsule theme overrides
-src/presets.js          Nine presets, ordering, colors, and parameters
-src/cosmic-shader.js    Nebula and Aurora WebGL2 rendering
-src/fallback.js         Canvas 2D fallback rendering
-src/main.js             Page interaction and render scheduling
-scripts/serve.mjs       Local static server
+index.html                         Page structure and filter entry
+styles.css                         Original page and component styles
+aurora.css                         NC-07–NC-09 Aurora theme
+progress.css                       NC-10–NC-12 fixed narrow layout
+src/presets.js                     Frozen NC-01–NC-09 presets
+src/cosmic-shader.js               Nebula / Aurora WebGL2 rendering
+src/fallback.js                    Original nine-capsule Canvas fallback
+src/main.js                        Original nine-capsule interaction and scheduling
+src/progress-*.js                  Independent progress-capsule modules
+progress-tests.mjs                 Progress and frozen-boundary validation
+scripts/serve.mjs                  Local static server
 ```
 
 ## Network scope
 
-By default, the project serves only on local address `127.0.0.1`. It is not published to the internet and does not upload user data.
+By default, the project serves only on local address `127.0.0.1`. It is not automatically published to the internet and does not upload user data.
