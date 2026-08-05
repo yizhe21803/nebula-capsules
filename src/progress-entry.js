@@ -40,6 +40,19 @@ function mountProgressCapsules() {
 
   shuffleButton.addEventListener('click', () => progressCapsules.randomize());
 
+  const filterButtons = [...document.querySelectorAll('.filter-button')];
+
+  function syncProgressLayout() {
+    const selectedFilter = document.querySelector('.filter-button.is-active')?.dataset.filter || 'all';
+    grid.classList.toggle('is-progress-single-column', selectedFilter === 'progress');
+  }
+
+  for (const button of filterButtons) {
+    button.addEventListener('click', () => requestAnimationFrame(syncProgressLayout));
+  }
+
+  syncProgressLayout();
+
   let lastFrame = performance.now();
   let pageVisible = !document.hidden;
   let flowTime = 0;
@@ -57,7 +70,7 @@ function mountProgressCapsules() {
     if (pageVisible) {
       progressCapsules.update(delta, paused, now);
       if (!paused) flowTime += delta;
-      flowOverlays.update(flowTime);
+      flowOverlays.update(flowTime, paused);
     }
 
     requestAnimationFrame(update);
