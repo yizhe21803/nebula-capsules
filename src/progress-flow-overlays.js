@@ -1,4 +1,8 @@
 import { createProgressFlowRenderer } from './progress-flow-renderer.js';
+import {
+  PROGRESS_REFERENCE_DURATION,
+  getProgressReferenceAtlas
+} from './progress-reference-atlases.js';
 
 export function createProgressFlowOverlays(cards, presets) {
   const controllers = [];
@@ -20,6 +24,7 @@ export function createProgressFlowOverlays(cards, presets) {
       return;
     }
 
+    const atlas = getProgressReferenceAtlas(preset.id);
     stage.classList.add('has-webgl-progress');
 
     const resize = () => {
@@ -40,9 +45,14 @@ export function createProgressFlowOverlays(cards, presets) {
       stage,
       renderer,
       resizeObserver,
-      draw(time) {
+      draw(flowTime) {
+        const effectTime = flowTime % PROGRESS_REFERENCE_DURATION;
         const progress = Number.parseFloat(stage.style.getPropertyValue('--progress'));
-        renderer.draw(time, Number.isFinite(progress) ? progress : preset.initialProgress);
+        renderer.draw(
+          effectTime,
+          Number.isFinite(progress) ? progress : preset.initialProgress,
+          atlas.ready ? atlas.image : null
+        );
       },
       dispose() {
         resizeObserver.disconnect();
@@ -55,8 +65,8 @@ export function createProgressFlowOverlays(cards, presets) {
 
   return {
     active: controllers.length > 0,
-    update(time) {
-      for (const controller of controllers) controller.draw(time);
+    update(flowTime) {
+      for (const controller of controllers) controller.draw(flowTime);
     },
     dispose() {
       for (const controller of controllers) controller.dispose();
