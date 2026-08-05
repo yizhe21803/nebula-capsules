@@ -6,7 +6,7 @@ export const PROGRESS_PRESETS = [
     subtitle: 'SHA 4.5 + 100 2026 TKN',
     group: 'progress',
     initialProgress: 43,
-    loadRate: 4.2,
+    loadRate: 1.10,
     colors: ['#2B1025', '#FF3F94', '#FF8A3D', '#FFF06A']
   },
   {
@@ -16,7 +16,7 @@ export const PROGRESS_PRESETS = [
     subtitle: 'TRANSFERRING PROTOCOL',
     group: 'progress',
     initialProgress: 33,
-    loadRate: 3.4,
+    loadRate: 1.00,
     colors: ['#101C37', '#245BFF', '#00CFFF', '#5DFFE6']
   },
   {
@@ -26,7 +26,7 @@ export const PROGRESS_PRESETS = [
     subtitle: 'GENERATING POWER ++',
     group: 'progress',
     initialProgress: 58,
-    loadRate: 4.8,
+    loadRate: 1.05,
     colors: ['#21142D', '#7042FF', '#42F58D', '#C4FF8A']
   }
 ];
