@@ -1,3 +1,11 @@
+import {
+  PROGRESS_MOTION_WIDTH,
+  PROGRESS_MOTION_HEIGHT,
+  PROGRESS_MOTION_DURATION,
+  PROGRESS_MOTION_MAX_PX,
+  getProgressMotionData
+} from './progress-motion-data.js';
+
 function hexToRgb01(hex) {
   const value = Number.parseInt(hex.replace('#', ''), 16);
   return [
@@ -22,6 +30,12 @@ const PROFILE_INDEX = {
   'visual-training': 2
 };
 
+const MOTION_SCALE_FACTORS = {
+  'model-training': 1.05,
+  'agent-migration': 1.04,
+  'visual-training': 1.04
+};
+
 const VERTEX_SHADER = `#version 300 es
 in vec2 a_position;
 out vec2 v_uv;
@@ -41,6 +55,12 @@ uniform float u_time;
 uniform float u_progress;
 uniform float u_seed;
 uniform float u_profile;
+uniform sampler2D u_motion;
+uniform sampler2D u_effect;
+uniform float u_hasEffect;
+uniform float u_effectFrames;
+uniform float u_motionDuration;
+uniform float u_motionScale;
 uniform vec3 u_dark;
 uniform vec3 u_accentA;
 uniform vec3 u_accentB;
@@ -80,57 +100,30 @@ float gaussian(float value, float center, float width) {
   return exp(-delta * delta);
 }
 
-float edgeEnvelope(float y) {
-  return pow(max(sin(3.14159265 * clamp(y, 0.0, 1.0)), 0.0), 0.46);
-}
-
 float profileMix(float model, float agent, float visual) {
   if (u_profile < 0.5) return model;
   if (u_profile < 1.5) return agent;
   return visual;
 }
 
+float motionSample(float y, float t) {
+  float phase = fract(t / max(u_motionDuration, 0.001));
+  float captured = texture(u_motion, vec2(phase, 1.0 - clamp(y, 0.0, 1.0))).r;
+  return (captured * 2.0 - 1.0) * u_motionScale;
+}
+
 float edgeDisplacement(float y, float t) {
-  float envelope = edgeEnvelope(y);
-  float speed = profileMix(1.00, 0.80, 0.90);
-  float time = t * speed;
+  return motionSample(y, t);
+}
 
-  float broadScale = profileMix(1.65, 1.10, 1.42);
-  float middleScale = profileMix(4.15, 2.35, 3.45);
-  float detailScale = profileMix(7.60, 4.40, 6.10);
-
-  float broadAmp = profileMix(0.0158, 0.0208, 0.0218);
-  float middleAmp = profileMix(0.0128, 0.0038, 0.0068);
-  float detailAmp = profileMix(0.0062, 0.0008, 0.0012);
-
-  float broad = (fbm(vec2(y * broadScale + u_seed * 0.7, time * 0.095)) * 2.0 - 1.0) * broadAmp;
-  float middle = (fbm(vec2(y * middleScale + 7.3 + u_seed, -time * 0.17)) * 2.0 - 1.0) * middleAmp;
-  float detail = (fbm(vec2(y * detailScale + 17.1, time * 0.29 + u_seed)) * 2.0 - 1.0) * detailAmp;
-
-  float lobeCenterA = 0.27 + sin(time * 0.29 + u_seed * 3.0) * 0.14;
-  float lobeCenterB = 0.70 + cos(time * 0.25 + u_seed * 4.7) * 0.14;
-  float lobeWidth = profileMix(0.056, 0.130, 0.078);
-  float lobeAmp = profileMix(0.0145, 0.0175, 0.0205);
-  float lobes = gaussian(y, lobeCenterA, lobeWidth) * sin(time * 1.09 + u_seed * 6.0) * lobeAmp;
-  lobes -= gaussian(y, lobeCenterB, lobeWidth * 1.08) * cos(time * 0.96 + u_seed * 5.0) * lobeAmp;
-
-  float activity = profileMix(
-    0.68 + 0.32 * (0.5 + 0.5 * sin(time * 0.43 + u_seed * 1.2)),
-    0.62 + 0.38 * (0.5 + 0.5 * sin(time * 0.24 + u_seed * 1.7)),
-    0.58 + 0.42 * (0.5 + 0.5 * cos(time * 0.31 + u_seed * 1.4))
+float flowDisplacement(float y, float t) {
+  return (
+    motionSample(y - 0.024, t) * 0.08 +
+    motionSample(y - 0.012, t) * 0.18 +
+    motionSample(y, t) * 0.48 +
+    motionSample(y + 0.012, t) * 0.18 +
+    motionSample(y + 0.024, t) * 0.08
   );
-  float harmonic = profileMix(
-    sin(y * 31.4159265 + time * 0.82 + u_seed * 2.1) * 0.0138,
-    sin(y * 6.2831853 - time * 0.43 + u_seed * 1.8) * 0.0065,
-    sin(y * 12.5663706 + time * 0.58 + u_seed * 2.4) * 0.0140
-  ) * activity;
-  float microHarmonic = profileMix(
-    sin(y * 47.1238898 - time * 1.16 + u_seed * 3.7) * 0.0048,
-    0.0,
-    sin(y * 18.8495559 - time * 0.71 + u_seed * 3.1) * 0.0032
-  ) * activity;
-
-  return (broad + middle + detail + lobes + harmonic + microHarmonic) * envelope;
 }
 
 float ellipseRing(vec2 p, float radius, float width) {
@@ -141,64 +134,82 @@ void main() {
   vec2 uv = v_uv;
   float t = u_time;
   float edge = u_progress + edgeDisplacement(uv.y, t);
+  float flowEdge = u_progress + flowDisplacement(uv.y, t);
   float d = uv.x - edge;
+  float fd = uv.x - flowEdge;
 
-  vec3 rightBase = vec3(0.122, 0.125, 0.145);
+  vec3 rightBase = vec3(0.125, 0.129, 0.145);
   vec3 color = rightBase;
 
   float leftMask = 1.0 - smoothstep(-0.001, 0.002, d);
-  color = mix(color, u_dark, leftMask * profileMix(0.70, 0.90, 0.78));
+  color = mix(color, u_dark, leftMask * profileMix(0.96, 0.92, 0.96));
 
-  vec2 flowP = vec2((d + 0.13) * 5.2, uv.y * 1.85);
-  float flowA = fbm(flowP + vec2(-t * 0.080, t * 0.10) + u_seed * 1.7);
-  float flowB = fbm(flowP * 1.52 + vec2(t * 0.105, -t * 0.15) + 8.2 + u_seed);
-  float flowC = fbm(flowP * 2.25 + vec2(-t * 0.18, t * 0.20) + 19.0);
+  vec2 flowP = vec2((fd + 0.10) * 6.2, uv.y * 1.95);
+  float flowA = fbm(flowP + vec2(-t * 0.22, t * 0.27) + u_seed * 1.7);
+  float flowB = fbm(flowP * 1.52 + vec2(t * 0.28, -t * 0.36) + 8.2 + u_seed);
+  float flowC = fbm(flowP * 2.25 + vec2(-t * 0.41, t * 0.46) + 19.0);
 
-  float farCenter = profileMix(-0.165, -0.145, -0.155) + (flowA - 0.5) * 0.040;
-  float midCenter = profileMix(-0.098, -0.087, -0.092) + (flowB - 0.5) * 0.027;
-  float hotCenter = profileMix(-0.032, -0.030, -0.031) + (flowC - 0.5) * 0.014;
+  float farCenter = profileMix(-0.060, -0.079, -0.045) + (flowA - 0.5) * profileMix(0.018, 0.022, 0.014);
+  float midCenter = profileMix(-0.039, -0.052, -0.030) + (flowB - 0.5) * profileMix(0.013, 0.016, 0.010);
+  float hotCenter = profileMix(-0.026, -0.029, -0.023) + (flowC - 0.5) * 0.010;
 
-  float farBand = gaussian(d, farCenter, profileMix(0.090, 0.098, 0.092));
-  float midBand = gaussian(d, midCenter, profileMix(0.054, 0.062, 0.057));
-  float hotBand = gaussian(d, hotCenter, profileMix(0.027, 0.031, 0.029));
-  float darkTrough = gaussian(d, -0.060 + (flowB - 0.5) * 0.014, profileMix(0.027, 0.031, 0.029));
+  float farBand = gaussian(fd, farCenter, profileMix(0.035, 0.049, 0.030));
+  float midBand = gaussian(fd, midCenter, profileMix(0.026, 0.034, 0.026));
+  float hotBand = gaussian(fd, hotCenter, profileMix(0.023, 0.027, 0.026));
+  float darkTrough = gaussian(fd, profileMix(-0.050, -0.058, -0.044) + (flowB - 0.5) * 0.010, profileMix(0.020, 0.025, 0.021));
 
-  float ringY = 0.47 + sin(t * 0.22 + u_seed * 2.4) * 0.11;
-  vec2 ringP = vec2((d + 0.118) / 0.105, (uv.y - ringY) / 0.28);
-  ringP += vec2((flowB - 0.5) * 0.11, (flowA - 0.5) * 0.08);
-  float ring = ellipseRing(ringP, 0.64, 0.17);
-  float ringCore = gaussian(length(ringP), 0.24, 0.22);
-  float ringPulse = 0.62 + 0.38 * (0.5 + 0.5 * sin(t * 0.46 + u_seed * 4.1));
+  float ringY = 0.47 + sin(t * 0.58 + u_seed * 2.4) * 0.12;
+  vec2 ringP = vec2((fd + 0.086) / 0.078, (uv.y - ringY) / 0.25);
+  ringP += vec2((flowB - 0.5) * 0.08, (flowA - 0.5) * 0.06);
+  float ringTexture = fbm(ringP * 2.15 + vec2(t * 0.18, -t * 0.14) + u_seed * 1.9);
+  float ring = ellipseRing(ringP, 0.66, 0.32) * (0.30 + 0.64 * ringTexture);
+  float ringCore = gaussian(length(ringP), 0.25, 0.25);
+  float ringPulse = smoothstep(0.58, 0.90, 0.5 + 0.5 * sin(t * 0.82 + u_seed * 4.1));
   float modelRing = ring * ringPulse * (1.0 - step(0.5, u_profile));
-  float visualRing = ring * 0.22 * step(1.5, u_profile);
+  float visualRing = ring * 0.16 * step(1.5, u_profile) * ringPulse;
 
-  float cloudGate = leftMask * smoothstep(-0.30, -0.008, d);
+  float cloudGate = leftMask * smoothstep(-0.30, -0.008, fd);
   float textureA = smoothstep(0.24, 0.92, flowA * 0.72 + flowB * 0.42);
   float textureB = smoothstep(0.28, 0.94, flowB * 0.68 + flowC * 0.38);
 
-  color += u_accentA * farBand * cloudGate * (0.13 + textureA * profileMix(0.50, 0.42, 0.42));
-  color += u_accentB * midBand * cloudGate * (0.19 + textureB * profileMix(0.58, 0.56, 0.52));
-  color += u_glow * hotBand * cloudGate * profileMix(0.48, 0.34, 0.38);
+  vec3 hotColor = u_accentB;
+  color += u_accentA * farBand * cloudGate * (0.07 + textureA * profileMix(0.42, 0.24, 0.40));
+  color += u_accentB * midBand * cloudGate * (0.15 + textureB * profileMix(0.70, 0.46, 0.68));
+  color += hotColor * hotBand * cloudGate * profileMix(0.88, 0.62, 0.84);
   float modelMask = 1.0 - step(0.5, u_profile);
-  color += u_accentA * (modelRing + visualRing) * cloudGate * profileMix(0.82, 0.0, 0.36);
-  color *= 1.0 - darkTrough * profileMix(0.82, 0.66, 0.72) * cloudGate;
-  color *= 1.0 - ringCore * modelMask * 0.54 * cloudGate;
+  color += u_accentA * (modelRing + visualRing) * cloudGate * profileMix(0.54, 0.0, 0.34);
+  color *= 1.0 - darkTrough * profileMix(0.44, 0.24, 0.24) * cloudGate;
+  color *= 1.0 - ringCore * modelMask * ringPulse * 0.44 * cloudGate;
 
-  float broadHalo = exp(-abs(d) * 72.0);
-  float innerHalo = exp(-abs(d) * 138.0);
-  float colorCore = exp(-abs(d) * 270.0);
-  float sharpCore = exp(-abs(d) * 560.0);
-  float leftGate = 1.0 - smoothstep(-0.003, 0.007, d);
+  float broadHalo = exp(-abs(d) * 96.0);
+  float innerHalo = exp(-abs(d) * 176.0);
+  float colorCore = exp(-abs(d) * 360.0);
+  float sharpCore = exp(-abs(d) * 760.0);
+  float leftGate = 1.0 - smoothstep(-0.003, 0.005, d);
 
-  color += u_accentA * broadHalo * leftGate * profileMix(0.22, 0.11, 0.16);
-  color += u_accentB * innerHalo * leftGate * profileMix(0.80, 0.68, 0.68);
-  color += u_glow * colorCore * profileMix(0.94, 0.72, 0.78);
+  color += u_accentA * broadHalo * leftGate * profileMix(0.09, 0.04, 0.06);
+  color += hotColor * innerHalo * leftGate * profileMix(0.76, 0.72, 0.78);
+  color += u_glow * colorCore * profileMix(0.72, 0.34, 0.24);
 
-  float whiteStrength = profileMix(0.58, 0.06, 0.14);
+  float whiteStrength = profileMix(0.10, 0.0, 0.0);
   color += vec3(1.0, 0.99, 0.91) * sharpCore * whiteStrength;
 
-  float rightCut = smoothstep(0.003, 0.014, d);
+  float rightCut = smoothstep(0.001, 0.006, d);
   color = mix(color, rightBase, rightCut);
+
+  float effectX = (d * 1257.0 + 260.0) / 320.0;
+  float atlasPhase = fract(t / 12.0) * u_effectFrames;
+  float atlasFrameA = floor(atlasPhase);
+  float atlasFrameB = mod(atlasFrameA + 1.0, u_effectFrames);
+  float atlasMix = smoothstep(0.0, 1.0, fract(atlasPhase));
+  float atlasXA = (atlasFrameA + clamp(effectX, 0.0, 1.0)) / u_effectFrames;
+  float atlasXB = (atlasFrameB + clamp(effectX, 0.0, 1.0)) / u_effectFrames;
+  vec3 referenceA = texture(u_effect, vec2(atlasXA, uv.y)).rgb;
+  vec3 referenceB = texture(u_effect, vec2(atlasXB, uv.y)).rgb;
+  vec3 referenceColor = mix(referenceA, referenceB, atlasMix);
+  float stripMask = smoothstep(0.0, 0.018, effectX) * (1.0 - smoothstep(0.982, 1.0, effectX));
+  float referenceLeft = 1.0 - smoothstep(-0.026, -0.012, d);
+  color = mix(color, referenceColor, stripMask * referenceLeft * u_hasEffect);
 
   outColor = vec4(clamp(color, 0.0, 1.0), 1.0);
 }`;
@@ -248,6 +259,8 @@ export class ProgressFlowRenderer {
     this.profile = PROFILE_INDEX[preset.id] ?? 2;
     this.seed = stringSeed(`${preset.id}-shader`) * 13.7 + 1.0;
     this.colors = preset.colors.map(hexToRgb01);
+    this.motionData = getProgressMotionData(preset.id);
+    this.motionScale = (PROGRESS_MOTION_MAX_PX * (MOTION_SCALE_FACTORS[preset.id] || 1.65)) / 1257;
 
     this.position = gl.getAttribLocation(this.program, 'a_position');
     this.uniforms = {
@@ -256,6 +269,12 @@ export class ProgressFlowRenderer {
       progress: gl.getUniformLocation(this.program, 'u_progress'),
       seed: gl.getUniformLocation(this.program, 'u_seed'),
       profile: gl.getUniformLocation(this.program, 'u_profile'),
+      motion: gl.getUniformLocation(this.program, 'u_motion'),
+      effect: gl.getUniformLocation(this.program, 'u_effect'),
+      hasEffect: gl.getUniformLocation(this.program, 'u_hasEffect'),
+      effectFrames: gl.getUniformLocation(this.program, 'u_effectFrames'),
+      motionDuration: gl.getUniformLocation(this.program, 'u_motionDuration'),
+      motionScale: gl.getUniformLocation(this.program, 'u_motionScale'),
       dark: gl.getUniformLocation(this.program, 'u_dark'),
       accentA: gl.getUniformLocation(this.program, 'u_accentA'),
       accentB: gl.getUniformLocation(this.program, 'u_accentB'),
@@ -269,6 +288,46 @@ export class ProgressFlowRenderer {
       new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]),
       gl.STATIC_DRAW
     );
+
+    this.motionTexture = gl.createTexture();
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.motionTexture);
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.R8,
+      PROGRESS_MOTION_WIDTH,
+      PROGRESS_MOTION_HEIGHT,
+      0,
+      gl.RED,
+      gl.UNSIGNED_BYTE,
+      this.motionData
+    );
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+    this.effectTexture = gl.createTexture();
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, this.effectTexture);
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.RGB,
+      1,
+      1,
+      0,
+      gl.RGB,
+      gl.UNSIGNED_BYTE,
+      new Uint8Array([32, 33, 38])
+    );
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    this.effectUploaded = false;
   }
 
   resize(width, height, dpr) {
@@ -281,7 +340,7 @@ export class ProgressFlowRenderer {
     this.gl.viewport(0, 0, pixelWidth, pixelHeight);
   }
 
-  draw(time, progress) {
+  draw(time, progress, effectImage = null) {
     const gl = this.gl;
     gl.useProgram(this.program);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
@@ -293,6 +352,32 @@ export class ProgressFlowRenderer {
     gl.uniform1f(this.uniforms.progress, progress / 100);
     gl.uniform1f(this.uniforms.seed, this.seed);
     gl.uniform1f(this.uniforms.profile, this.profile);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.motionTexture);
+    gl.uniform1i(this.uniforms.motion, 0);
+    gl.uniform1f(this.uniforms.motionDuration, PROGRESS_MOTION_DURATION);
+    gl.uniform1f(this.uniforms.motionScale, this.motionScale);
+
+    let hasEffect = this.effectUploaded ? 1 : 0;
+    if (!this.effectUploaded && effectImage && effectImage.complete && effectImage.naturalWidth > 0) {
+      gl.activeTexture(gl.TEXTURE1);
+      gl.bindTexture(gl.TEXTURE_2D, this.effectTexture);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+      try {
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, effectImage);
+        this.effectUploaded = true;
+        hasEffect = 1;
+      } catch (error) {
+        console.warn('[画境观屿] 参考纹理图集上传失败，继续使用程序化降级。', error);
+      }
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+    }
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, this.effectTexture);
+    gl.uniform1i(this.uniforms.effect, 1);
+    gl.uniform1f(this.uniforms.hasEffect, hasEffect);
+    gl.uniform1f(this.uniforms.effectFrames, 24);
+
     gl.uniform3fv(this.uniforms.dark, this.colors[0]);
     gl.uniform3fv(this.uniforms.accentA, this.colors[1]);
     gl.uniform3fv(this.uniforms.accentB, this.colors[2]);
@@ -304,6 +389,8 @@ export class ProgressFlowRenderer {
   dispose() {
     const gl = this.gl;
     gl.deleteBuffer(this.buffer);
+    gl.deleteTexture(this.motionTexture);
+    gl.deleteTexture(this.effectTexture);
     gl.deleteProgram(this.program);
   }
 }
