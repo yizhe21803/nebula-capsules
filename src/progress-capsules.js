@@ -1,7 +1,7 @@
 import { PROGRESS_PRESETS } from './progress-presets.js';
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
-const lerp = (start, end, amount) => start + (end - start) * amount;
+const BRAND_NAME = '画境观屿';
 
 function hexToRgba(hex, alpha = 1) {
   const normalized = hex.replace('#', '');
@@ -73,10 +73,8 @@ class ProgressCapsuleController {
     this.context = this.canvas.getContext('2d');
     this.valueElement = card.querySelector('.progress-value');
     this.value = preset.initialProgress;
-    this.targetValue = preset.initialProgress;
     this.dragging = false;
     this.resumeAt = 0;
-    this.nextTargetAt = 0;
     this.flowTime = stringSeed(preset.id) * 31;
     this.seed = stringSeed(`${preset.id}-reference`) * Math.PI * 2;
     this.randomState = Math.floor(stringSeed(`${preset.id}-auto`) * 0x7fffffff) || 1;
@@ -394,7 +392,6 @@ class ProgressCapsuleController {
     const bounds = this.stage.getBoundingClientRect();
     const ratio = bounds.width > 0 ? (event.clientX - bounds.left) / bounds.width : 0;
     this.setProgress(ratio * 100);
-    this.targetValue = this.value;
     this.drawReferenceFlow();
   }
 
@@ -418,7 +415,6 @@ class ProgressCapsuleController {
     if (!this.dragging) return;
     this.dragging = false;
     this.resumeAt = performance.now() + 1800;
-    this.nextTargetAt = this.resumeAt;
     this.stage.classList.remove('is-dragging');
     try {
       if (event?.pointerId !== undefined && this.stage.hasPointerCapture?.(event.pointerId)) {
@@ -454,38 +450,24 @@ class ProgressCapsuleController {
       } else {
         return;
       }
-      this.targetValue = this.value;
       this.resumeAt = performance.now() + 1800;
-      this.nextTargetAt = this.resumeAt;
       this.drawReferenceFlow();
     });
-  }
-
-  chooseNextTarget(now) {
-    const [minValue, maxValue] = this.profile.autoRange;
-    this.targetValue = minValue + this.random() * (maxValue - minValue);
-    this.nextTargetAt = now + 650 + this.random() * 650;
   }
 
   update(delta, paused, now) {
     if (!paused) this.flowTime += delta;
 
-    if (!paused && !this.dragging && now >= this.resumeAt) {
-      if (!this.nextTargetAt || now >= this.nextTargetAt) this.chooseNextTarget(now);
-      const easing = 1 - Math.exp(-delta * 3.25);
-      this.setProgress(lerp(this.value, this.targetValue, easing));
+    if (!paused && !this.dragging && now >= this.resumeAt && this.value < 100) {
+      const forwardStep = Math.min(this.preset.loadRate * delta, 0.060);
+      this.setProgress(Math.min(100, this.value + forwardStep));
     }
 
     this.drawReferenceFlow();
   }
 
   randomize() {
-    this.resumeAt = performance.now() + 500;
-    this.nextTargetAt = this.resumeAt;
     this.flowTime = this.random() * 40;
-    const [minValue, maxValue] = this.profile.autoRange;
-    this.setProgress(minValue + this.random() * (maxValue - minValue));
-    this.targetValue = this.value;
     this.drawReferenceFlow();
   }
 }
@@ -500,20 +482,20 @@ function createProgressCard(preset) {
   card.innerHTML = `
     <span class="card-topline">
       <span><span class="card-code">${preset.code}</span> <strong>${preset.name}</strong></span>
-      <span class="card-live">AUTO + DRAG</span>
+      <span class="card-live">FORWARD + DRAG</span>
     </span>
     <span
       class="progress-stage"
       role="slider"
       tabindex="0"
-      aria-label="${preset.name} 加载进度"
+      aria-label="${BRAND_NAME} ${preset.code} 加载进度"
       aria-valuemin="0"
       aria-valuemax="100"
       aria-valuenow="${preset.initialProgress}"
     >
       <canvas class="progress-wave-canvas" aria-hidden="true"></canvas>
       <span class="progress-copy">
-        <span class="progress-name">${preset.name}<sup>*</sup></span>
+        <span class="progress-name">${BRAND_NAME}</span>
         <span class="progress-subtitle">${preset.subtitle}</span>
       </span>
       <span class="progress-value" aria-hidden="true">${preset.initialProgress}%</span>
